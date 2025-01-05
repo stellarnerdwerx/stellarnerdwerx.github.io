@@ -67,3 +67,145 @@ footer {
     text-align: center;
     padding: 1em 0;
 }
+
+
+
+/* Search Section Styles */
+#movies {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+.search {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+#movie-search {
+    flex: 1;
+    min-width: 200px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+#movie-format,
+#movie-genre {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+    min-width: 150px;
+}
+
+button {
+    padding: 8px 20px;
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.2s;
+}
+
+button:hover {
+    background-color: #0052a3;
+}
+
+/* Results List Styles */
+#movie-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 20px;
+}
+
+.movie-item {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.movie-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.movie-title {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.movie-meta {
+    color: #666;
+    font-size: 0.9em;
+    margin-bottom: 12px;
+}
+
+.movie-genres {
+    color: #0066cc;
+    font-size: 0.9em;
+    margin-bottom: 12px;
+}
+
+.movie-plot {
+    color: #444;
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+.movie-cast,
+.movie-director {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 8px;
+}
+
+/* Error and No Results Styles */
+.error {
+    color: #dc3545;
+    padding: 20px;
+    background: #fff;
+    border: 1px solid #dc3545;
+    border-radius: 4px;
+    margin-top: 20px;
+}
+
+.no-results {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-style: italic;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .search {
+        flex-direction: column;
+    }
+
+    #movie-search,
+    #movie-format,
+    #movie-genre,
+    button {
+        width: 100%;
+    }
+
+    .movie-item {
+        padding: 15px;
+    }
+}
