@@ -407,6 +407,9 @@ document.addEventListener('DOMContentLoaded', () => {
         // Build the display HTML using the mapped data
         listItem.innerHTML = `
           <div class="bgame-title">${bgameData.title || ''}</div>
+          <div class="bgame-meta">
+            <span>${bgameData.category || ''}</span>
+          </div>
         `;
     
         bgameList.appendChild(listItem);
