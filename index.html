@@ -109,9 +109,9 @@
             }
 
             // Run the SQL query to search for movies
-            const query = `SELECT title, genres, year, runtime, rating, plot, cast, director FROM movies ${whereClause}`;
+            const query = db.prepare(`SELECT title, genres, year, runtime, rating, plot, cast, director FROM movies ${whereClause}`);
             console.log(query)
-            var results = db.exec(query);
+            const results = db.exec("SELECT * FROM movies LIMIT 5");
             // Process and display the results
             if (results.length > 0) {
                 const movieList = results[0].values;
