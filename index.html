@@ -69,16 +69,21 @@
 
         // Load the SQLite database
         async function loadDatabase() {
-            const response = await fetch('assets/playpickr.db');
-            const buffer = await response.arrayBuffer();
+            try {
+                const response = await fetch('assets/playpicker.db');
+                const buffer = await response.arrayBuffer();
 
-            // Load the database from the array buffer
-            const SQL = await initSqlJs({
-                locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.7.1/dist/${file}`
-            });
+                // Initialize SQLite.js after it is loaded
+                const SQL = await initSqlJs({
+                    locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.7.1/dist/${file}`
+                });
 
-            db = new SQL.Database(new Uint8Array(buffer));
-            console.log('Database loaded!');
+                // Open the database
+                db = new SQL.Database(new Uint8Array(buffer));
+                console.log('Database loaded!');
+            } catch (error) {
+                console.error('Error loading database:', error);
+            }
         }
 
         // Function to search for movies by title, genre, and format
