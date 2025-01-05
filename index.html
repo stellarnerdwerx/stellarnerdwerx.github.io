@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="assets/style.css">
-    <link rel="icon" href="assets/icon.png">
+    <link rel="icon" href="assets/icon.jpg">
     <title>PlayPickr</title>
 </head>
 <script src="https://cdn.jsdelivr.net/npm/sql.js@1.12.0/dist/sql-wasm.min.js"></script>
@@ -192,8 +192,8 @@ document.addEventListener('DOMContentLoaded', () => {
     <section id="games">
         <h2>Games</h2>
         <div class="search">
-            <input type="text" id="game-search" placeholder="Search games...">
-            <select id="game-console">
+            <input type="text" id="vgame-search" placeholder="Search games...">
+            <select id="vgame-console">
                 <option value="">Select Console</option>
                 <option value="NES">NES</option>
                 <option value="SNES">SNES</option>
@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <option value="XBOX_KINECT">XBOX Kinect</option>
                 <option value="XBOX_ONE">XBOX One</option>
             </select>
-            <button onclick="searchGamesV()">Search</button>
+            <button onclick="searchvgames()">Search</button>
         </div>
         <ul id="vgame-list">
             <!-- Game results will appear here -->
@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </section>
     <script>
         // Function to search for vgames
-function searchGamesV() {
+function searchvgames() {
   try {
     if (!db) {
       throw new Error('Database not loaded yet');
@@ -240,7 +240,6 @@ function searchGamesV() {
 
     const title = document.getElementById('vgame-search').value.toLowerCase();
     const console = document.getElementById('vgame-console').value;
-    const format = document.getElementById('vgame-format').value;
 
     let query = "SELECT * FROM games_video WHERE 1=1";
     let conditions = [];
@@ -309,8 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   // Add change event listeners for dropdowns
-  document.getElementById('vgame-format').addEventListener('change', searchvgames);
-  document.getElementById('vgame-genre').addEventListener('change', searchvgames);
+  document.getElementById('vgame-console').addEventListener('change', searchvgames);
 });
     </script>
 
