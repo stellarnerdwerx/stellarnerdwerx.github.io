@@ -50,14 +50,6 @@ nav ul li a {
 nav ul li a:hover {
     text-decoration: underline;
 }
-section {
-    display: none; /* Hide all sections by default */
-}
-section.active {
-    display: block; /* Show the active section */
-    margin: 2em;
-
-}
 
 h2 {
     color: #9b59b6;
@@ -94,15 +86,24 @@ footer {
 
 
 /* Search Section Styles */
-#movies,
-#games,
+#movies{
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+#games{
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
 #boardgames {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
-
 .search {
     display: flex;
     gap: 10px;

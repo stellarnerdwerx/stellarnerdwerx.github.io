@@ -33,7 +33,7 @@
         const sections = document.querySelectorAll('section');
 
         // Initially hide all sections
-        sections.forEach(section => section.style.display = 'none');
+        // sections.forEach(section => section.style.display = 'none');
 
         navLinks.forEach(link => {
             link.addEventListener('click', function(event) {
@@ -53,11 +53,9 @@
             });
         });
 
-        // Optionally, you can show the first section by default on page load
-        document.querySelector('section').style.display = 'block';
     </script>
     <!-- Movies Section -->
-    <section id="movies">
+    <section id="movies" style="display:none">
         <h2>Movies</h2>
         <div class="search">
             <!-- Text search for title -->
@@ -223,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </section>
 
     <!-- Games Section -->
-    <section id="games">
+    <section id="games" style="display:none">
         <h2>Games</h2>
         <div class="search">
             <input type="text" id="vgame-search" placeholder="Search games...">
@@ -347,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
     </script>
 
     <!-- Board Games Section -->
-    <section id="boardgames">
+    <section id="boardgames" style="display:none">
         <h2>Board Games</h2>
         <div class="search">
             <input type="text" id="bgame-search" placeholder="Search board games...">
