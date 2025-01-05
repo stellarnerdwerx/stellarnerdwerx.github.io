@@ -63,134 +63,110 @@
     </section>
         <!-- SQLite.js Library -->
 <script>
-    const sqlConfig = {
-    locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.12.0/dist/${file}`
-    };
+    // SQLite.js Library
+const sqlConfig = {
+  locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.12.0/dist/${file}`
+};
 
-    let db;
+let db;
 
-    // Load the SQLite database
-    async function loadDatabase() {
-    try {
-        // First, initialize SQL.js
-        const SQL = await initSqlJs(sqlConfig);
-        
-        // Then fetch the database file
-        const response = await fetch('assets/playpickr.db');
-        if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        const buffer = await response.arrayBuffer();
-        
-        // Create the database instance
-        db = new SQL.Database(new Uint8Array(buffer));
-        console.log('Database loaded successfully!');
-    } catch (error) {
-        console.error('Database loading error:', error);
-        document.getElementById('movie-list').innerHTML = 
-        '<li class="error">Error loading database. Please check console for details.</li>';
-    }
-    }
-
-    // Function to safely escape SQL string inputs
-    function escapeSQL(str) {
-    if (typeof str !== 'string') return str;
-    return str.replace(/[\0\x08\x09\x1a\n\r"'\\\%]/g, char => {
-        switch (char) {
-        case "'":
-            return "''";
-        default:
-            return char;
-        }
-    });
-    }
-
-    // Function to search for movies
-    function searchMovies() {
-    try {
-        if (!db) {
-        throw new Error('Database not loaded yet');
-        }
-
-        const title = escapeSQL(document.getElementById('movie-search').value.toLowerCase());
-        const genre = escapeSQL(document.getElementById('movie-genre').value.toLowerCase());
-        const format = escapeSQL(document.getElementById('movie-format').value);
-
-        // Build the query with parameters to prevent SQL injection
-        let query = `
-        SELECT 
-            title, 
-            genres, 
-            year, 
-            runtime, 
-            rating, 
-            plot, 
-            cast, 
-            director 
-        FROM movies 
-        WHERE 1=1
-        `;
-
-        if (title) {
-        query += ` AND LOWER(title) LIKE '%${title}%'`;
-        }
-        
-        if (genre) {
-        query += ` AND LOWER(genres) LIKE '%${genre}%'`;
-        }
-        
-        if (format) {
-        query += ` AND ${format} = 1`;
-        }
-
-        // Execute the query
-        const results = db.exec(query);
-        
-        // Display results
-        const movieList = document.getElementById('movie-list');
-        movieList.innerHTML = '';
-
-        if (results.length > 0 && results[0].values.length > 0) {
-        results[0].values.forEach(movie => {
-            const listItem = document.createElement('li');
-            listItem.className = 'movie-item';
-            listItem.innerHTML = `
-            <div class="movie-title">${movie[0]}</div>
-            <div class="movie-meta">
-                <span>${movie[2]} | ${movie[3]} mins | ${movie[4]}/10</span>
-            </div>
-            <div class="movie-genres">${movie[1]}</div>
-            <div class="movie-plot">${movie[5]}</div>
-            <div class="movie-cast">Cast: ${movie[6]}</div>
-            <div class="movie-director">Director: ${movie[7]}</div>
-            `;
-            movieList.appendChild(listItem);
-        });
-        } else {
-        movieList.innerHTML = '<li class="no-results">No movies found matching your criteria.</li>';
-        }
-    } catch (error) {
-        console.error('Search error:', error);
-        document.getElementById('movie-list').innerHTML = 
-        '<li class="error">Error performing search. Please check console for details.</li>';
-    }
-    }
-
-    // Add event listeners
-    document.addEventListener('DOMContentLoaded', () => {
-    loadDatabase();
+// Load the SQLite database
+async function loadDatabase() {
+  try {
+    // First, initialize SQL.js
+    const SQL = await initSqlJs(sqlConfig);
     
-    // Add event listener for enter key on search input
-    document.getElementById('movie-search').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-        searchMovies();
-        }
-    });
+    // Then fetch the database file
+    const response = await fetch('assets/playpickr.db');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const buffer = await response.arrayBuffer();
+    
+    // Create the database instance
+    db = new SQL.Database(new Uint8Array(buffer));
+    
+    // Verify database and table structure
+    try {
+      const tableInfo = db.exec("SELECT sql FROM sqlite_master WHERE type='table' AND name='movies'");
+      console.log('Table structure:', tableInfo);
+      
+      // Test query to verify data access
+      const testQuery = db.exec("SELECT * FROM movies LIMIT 1");
+      console.log('Test query result:', testQuery);
+      
+      console.log('Database loaded and verified successfully!');
+    } catch (e) {
+      console.error('Database verification error:', e);
+    }
+  } catch (error) {
+    console.error('Database loading error:', error);
+    document.getElementById('movie-list').innerHTML = 
+      '<li class="error">Error loading database. Please check console for details.</li>';
+  }
+}
 
-    // Add event listeners for select changes
-    document.getElementById('movie-format').addEventListener('change', searchMovies);
-    document.getElementById('movie-genre').addEventListener('change', searchMovies);
-    });
+// Function to search for movies (simplified version)
+function searchMovies() {
+  try {
+    if (!db) {
+      throw new Error('Database not loaded yet');
+    }
+
+    const title = document.getElementById('movie-search').value.toLowerCase();
+    const genre = document.getElementById('movie-genre').value;
+    const format = document.getElementById('movie-format').value;
+
+    // Start with a simple query
+    let query = "SELECT * FROM movies WHERE 1=1";
+
+    // Only add conditions if values are provided
+    if (title) {
+      query += ` AND LOWER(title) LIKE '%${title}%'`;
+    }
+
+    console.log('Executing query:', query);
+    
+    // Execute query and get results
+    const results = db.exec(query);
+    console.log('Query results:', results);
+
+    // Display results
+    const movieList = document.getElementById('movie-list');
+    movieList.innerHTML = '';
+
+    if (results && results.length > 0 && results[0].values.length > 0) {
+      results[0].values.forEach(movie => {
+        const listItem = document.createElement('li');
+        listItem.textContent = movie[0]; // Just display the title for now
+        movieList.appendChild(listItem);
+      });
+    } else {
+      movieList.innerHTML = '<li>No movies found.</li>';
+    }
+
+  } catch (error) {
+    console.error('Search error:', error);
+    console.error('Error stack:', error.stack);
+    document.getElementById('movie-list').innerHTML = 
+      `<li class="error">Error: ${error.message}</li>`;
+  }
+}
+
+// Add event listeners
+document.addEventListener('DOMContentLoaded', () => {
+  loadDatabase();
+
+  // Add event listener for the search button
+  document.querySelector('button').addEventListener('click', searchMovies);
+  
+  // Add event listener for enter key on search input
+  document.getElementById('movie-search').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      searchMovies();
+    }
+  });
+});
 </script>
     </section>
 
