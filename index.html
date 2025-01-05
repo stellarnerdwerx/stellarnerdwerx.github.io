@@ -61,88 +61,137 @@
         <!-- Movie results will appear here -->
         <ul id="movie-list"></ul>
     </section>
+        <!-- SQLite.js Library -->
+<script>
+    const sqlConfig = {
+    locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.12.0/dist/${file}`
+    };
 
-    <!-- SQLite.js Library -->
-    <script src="https://cdn.jsdelivr.net/npm/sql.js@1.12.0/dist/sql-wasm.min.js"></script>
+    let db;
 
-    <script>
-        let db;
+    // Load the SQLite database
+    async function loadDatabase() {
+    try {
+        // First, initialize SQL.js
+        const SQL = await initSqlJs(sqlConfig);
+        
+        // Then fetch the database file
+        const response = await fetch('assets/playpickr.db');
+        if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const buffer = await response.arrayBuffer();
+        
+        // Create the database instance
+        db = new SQL.Database(new Uint8Array(buffer));
+        console.log('Database loaded successfully!');
+    } catch (error) {
+        console.error('Database loading error:', error);
+        document.getElementById('movie-list').innerHTML = 
+        '<li class="error">Error loading database. Please check console for details.</li>';
+    }
+    }
 
-        // Load the SQLite database
-        async function loadDatabase() {
-            try {
-                const response = await fetch('assets/playpickr.db');
-                const buffer = await response.arrayBuffer();
+    // Function to safely escape SQL string inputs
+    function escapeSQL(str) {
+    if (typeof str !== 'string') return str;
+    return str.replace(/[\0\x08\x09\x1a\n\r"'\\\%]/g, char => {
+        switch (char) {
+        case "'":
+            return "''";
+        default:
+            return char;
+        }
+    });
+    }
 
-                // Initialize SQLite.js after it is loaded
-                const SQL = await initSqlJs({
-                    locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.12.0/dist/${file}`
-                });
-
-                // Open the database
-                db = new SQL.Database(new Uint8Array(buffer));
-                console.log('Database loaded!');
-            } catch (error) {
-                console.error('Error loading database:', error);
-            }
+    // Function to search for movies
+    function searchMovies() {
+    try {
+        if (!db) {
+        throw new Error('Database not loaded yet');
         }
 
-        // Function to search for movies by title, genre, and format
-        async function searchMovies() {
-            var title = document.getElementById('movie-search').value.toLowerCase();
-            var genre = document.getElementById('movie-genre').value.toLowerCase();
-            var format = document.getElementById('movie-format').value;
+        const title = escapeSQL(document.getElementById('movie-search').value.toLowerCase());
+        const genre = escapeSQL(document.getElementById('movie-genre').value.toLowerCase());
+        const format = escapeSQL(document.getElementById('movie-format').value);
 
-            // Start building the WHERE clause
-            let whereClause = "WHERE 1=1"; // Start with a condition that's always true
+        // Build the query with parameters to prevent SQL injection
+        let query = `
+        SELECT 
+            title, 
+            genres, 
+            year, 
+            runtime, 
+            rating, 
+            plot, 
+            cast, 
+            director 
+        FROM movies 
+        WHERE 1=1
+        `;
 
-            if (title) {
-                whereClause += ` AND LOWER(title) LIKE '%${title}%'`;
-            }
-
-            if (genre) {
-                whereClause += ` AND LOWER(genres) LIKE '%${genre}%'`;
-            }
-
-            if (format) {
-                whereClause += ` AND LOWER(${format}) = 1`;  // Format fields are stored as 1 (for true)
-            }
-
-            // Run the SQL query to search for movies
-            const query = db.prepare(`SELECT title, genres, year, runtime, rating, plot, cast, director FROM movies ${whereClause}`);
-            console.log(query)
-            const results = db.exec("SELECT * FROM movies LIMIT 5");
-            // Process and display the results
-            if (results.length > 0) {
-                const movieList = results[0].values;
-                displayMovies(movieList);
-            } else {
-                alert("No movies found.");
-            }
+        if (title) {
+        query += ` AND LOWER(title) LIKE '%${title}%'`;
+        }
+        
+        if (genre) {
+        query += ` AND LOWER(genres) LIKE '%${genre}%'`;
+        }
+        
+        if (format) {
+        query += ` AND ${format} = 1`;
         }
 
-        // Function to display movies in the UI
-        function displayMovies(movies) {
-            const movieList = document.getElementById('movie-list');
-            movieList.innerHTML = ''; // Clear previous results
+        // Execute the query
+        const results = db.exec(query);
+        
+        // Display results
+        const movieList = document.getElementById('movie-list');
+        movieList.innerHTML = '';
 
-            movies.forEach(movie => {
-                const listItem = document.createElement('li');
-                listItem.innerHTML = `
-                    <strong>${movie[0]}</strong> <br>
-                    <em>Genre: ${movie[1]}</em> <br>
-                    <em>Year: ${movie[2]}</em> <br>
-                    <em>Rating: ${movie[4]}</em> <br>
-                    <em>Cast: ${movie[6]}</em> <br>
-                    <p>${movie[5]}</p>
-                `;
-                movieList.appendChild(listItem);
-            });
+        if (results.length > 0 && results[0].values.length > 0) {
+        results[0].values.forEach(movie => {
+            const listItem = document.createElement('li');
+            listItem.className = 'movie-item';
+            listItem.innerHTML = `
+            <div class="movie-title">${movie[0]}</div>
+            <div class="movie-meta">
+                <span>${movie[2]} | ${movie[3]} mins | ${movie[4]}/10</span>
+            </div>
+            <div class="movie-genres">${movie[1]}</div>
+            <div class="movie-plot">${movie[5]}</div>
+            <div class="movie-cast">Cast: ${movie[6]}</div>
+            <div class="movie-director">Director: ${movie[7]}</div>
+            `;
+            movieList.appendChild(listItem);
+        });
+        } else {
+        movieList.innerHTML = '<li class="no-results">No movies found matching your criteria.</li>';
         }
+    } catch (error) {
+        console.error('Search error:', error);
+        document.getElementById('movie-list').innerHTML = 
+        '<li class="error">Error performing search. Please check console for details.</li>';
+    }
+    }
 
-        // Load the database when the page loads
-        window.onload = loadDatabase;
-    </script>
+    // Add event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+    loadDatabase();
+    
+    // Add event listener for enter key on search input
+    document.getElementById('movie-search').addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+        searchMovies();
+        }
+    });
+
+    // Add event listeners for select changes
+    document.getElementById('movie-format').addEventListener('change', searchMovies);
+    document.getElementById('movie-genre').addEventListener('change', searchMovies);
+    });
+</script>
     </section>
 
     <!-- Games Section -->
