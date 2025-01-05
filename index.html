@@ -32,19 +32,29 @@
         const navLinks = document.querySelectorAll('nav a');
         const sections = document.querySelectorAll('section');
 
+        // Initially hide all sections
+        sections.forEach(section => section.style.display = 'none');
+
         navLinks.forEach(link => {
             link.addEventListener('click', function(event) {
-                event.preventDefault(); // Prevent default link behavior
-                const targetId = link.getAttribute('href').substring(1); // Get section ID
+                event.preventDefault(); // Prevent default link behavior (no scrolling)
+
+                // Get the ID of the section to show
+                const targetId = link.getAttribute('href').substring(1); // e.g. 'movies'
+
+                // Hide all sections and only show the clicked one
                 sections.forEach(section => {
                     if (section.id === targetId) {
-                        section.classList.add('active'); // Show the section
+                        section.style.display = 'block'; // Show the selected section
                     } else {
-                        section.classList.remove('active'); // Hide other sections
+                        section.style.display = 'none'; // Hide others
                     }
                 });
             });
         });
+
+        // Optionally, you can show the first section by default on page load
+        document.querySelector('section').style.display = 'block';
     </script>
     <!-- Movies Section -->
     <section id="movies">
@@ -443,7 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     </script>
     <footer>
-        <p>&copy; 2025 PlayPickr. All rights reserved.</p>
+        <p>&copy; 2025 PlayPickr.</p>
     </footer>
 
 </body>
