@@ -46,14 +46,17 @@
                 sections.forEach(section => {
                     if (section.id === targetId) {
                         section.classList.add('active');  // Show this section
+                        section.style.display = 'block';
                     } else {
                         section.classList.remove('active'); // Hide others
+                        section.style.display = 'none';
                     }
                 });
             });
         });
 
     </script>
+    <section></section>
     <!-- Movies Section -->
     <section id="movies" style="display:none">
         <h2>Movies</h2>
