@@ -3,79 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="assets/style.css">
     <title>PlayPickr</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #ecf0f1;
-            color: #34495e;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background-color: #9b59b6;
-            color: white;
-            text-align: center;
-            padding: 2em 0;
-        }
-        header h1 {
-            margin: 0;
-        }
-        nav ul {
-            list-style-type: none;
-            padding: 0;
-            text-align: center;
-            background-color: #3498db;
-            margin: 0;
-        }
-        nav ul li {
-            display: inline;
-            margin: 0 1em;
-        }
-        nav ul li a {
-            color: white;
-            text-decoration: none;
-            font-size: 1.2em;
-        }
-        nav ul li a:hover {
-            text-decoration: underline;
-        }
-        section {
-            margin: 2em;
-        }
-        h2 {
-            color: #9b59b6;
-        }
-        .search {
-            margin-bottom: 20px;
-        }
-        .search select, .search input[type="text"], .search button {
-            padding: 0.5em;
-            font-size: 1em;
-            margin-right: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        .search button {
-            background-color: #2ecc71;
-            color: white;
-            cursor: pointer;
-        }
-        .search button:hover {
-            background-color: #27ae60;
-        }
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-        footer {
-            background-color: #34495e;
-            color: white;
-            text-align: center;
-            padding: 1em 0;
-        }
-    </style>
 </head>
+<script src="https://cdn.jsdelivr.net/npm/sql.js@1.7.1/dist/sql-wasm.js"></script>
 <body>
     <header>
         <h1>Welcome to PlayPickr</h1>
@@ -94,7 +25,10 @@
     <section id="movies">
         <h2>Movies</h2>
         <div class="search">
+            <!-- Text search for title -->
             <input type="text" id="movie-search" placeholder="Search movies...">
+
+            <!-- Dropdown for format selection -->
             <select id="movie-format">
                 <option value="">Select Format</option>
                 <option value="dvd">DVD</option>
@@ -102,6 +36,8 @@
                 <option value="3dbluray">3D Blu-ray</option>
                 <option value="4k">4K</option>
             </select>
+
+            <!-- Dropdown for genre selection -->
             <select id="movie-genre">
                 <option value="">Select Genre</option>
                 <option value="action">Action</option>
@@ -116,11 +52,91 @@
                 <option value="sci-fi">Sci-Fi</option>
                 <option value="thriller">Thriller</option>
             </select>
+
+            <!-- Search button -->
             <button onclick="searchMovies()">Search</button>
         </div>
-        <ul id="movie-list">
-            <!-- Movie results will appear here -->
-        </ul>
+
+        <!-- Movie results will appear here -->
+        <ul id="movie-list"></ul>
+    </section>
+
+    <!-- SQLite.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/sql.js@1.7.1/dist/sql-wasm.js"></script>
+
+    <script>
+        let db;
+
+        // Load the SQLite database
+        async function loadDatabase() {
+            const response = await fetch('assets/playpickr.db');
+            const buffer = await response.arrayBuffer();
+
+            // Load the database from the array buffer
+            const SQL = await initSqlJs({
+                locateFile: file => `https://cdn.jsdelivr.net/npm/sql.js@1.7.1/dist/${file}`
+            });
+
+            db = new SQL.Database(new Uint8Array(buffer));
+            console.log('Database loaded!');
+        }
+
+        // Function to search for movies by title, genre, and format
+        async function searchMovies() {
+            const title = document.getElementById('movie-search').value.toLowerCase();
+            const genre = document.getElementById('movie-genre').value.toLowerCase();
+            const format = document.getElementById('movie-format').value;
+
+            // Start building the WHERE clause
+            let whereClause = "WHERE 1=1"; // Start with a condition that's always true
+
+            if (title) {
+                whereClause += ` AND LOWER(title) LIKE '%${title}%'`;
+            }
+
+            if (genre) {
+                whereClause += ` AND LOWER(genres) LIKE '%${genre}%'`;
+            }
+
+            if (format) {
+                whereClause += ` AND LOWER(${format}) = 1`;  // Format fields are stored as 1 (for true)
+            }
+
+            // Run the SQL query to search for movies
+            const query = `SELECT title, genres, year, runtime, rating, plot, cast, director FROM movies ${whereClause}`;
+            const results = db.exec(query);
+
+            // Process and display the results
+            if (results.length > 0) {
+                const movieList = results[0].values;
+                displayMovies(movieList);
+            } else {
+                alert("No movies found.");
+            }
+        }
+
+        // Function to display movies in the UI
+        function displayMovies(movies) {
+            const movieList = document.getElementById('movie-list');
+            movieList.innerHTML = ''; // Clear previous results
+
+            movies.forEach(movie => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <strong>${movie[0]}</strong> <br>
+                    <em>Genre: ${movie[1]}</em> <br>
+                    <em>Year: ${movie[2]}</em> <br>
+                    <em>Rating: ${movie[4]}</em> <br>
+                    <em>Cast: ${movie[6]}</em> <br>
+                    <p>${movie[5]}</p>
+                `;
+                movieList.appendChild(listItem);
+            });
+        }
+
+        // Load the database when the page loads
+        window.onload = loadDatabase;
+    </script>
     </section>
 
     <!-- Games Section -->
