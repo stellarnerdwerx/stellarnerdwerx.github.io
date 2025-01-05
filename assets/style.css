@@ -50,7 +50,9 @@ nav ul li a {
 nav ul li a:hover {
     text-decoration: underline;
 }
-
+section.active {
+    display: block;
+}
 h2 {
     color: #9b59b6;
 }
