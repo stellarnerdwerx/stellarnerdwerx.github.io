@@ -51,8 +51,14 @@ nav ul li a:hover {
     text-decoration: underline;
 }
 section {
-    margin: 2em;
+    display: none; /* Hide all sections by default */
 }
+section.active {
+    display: block; /* Show the active section */
+    margin: 2em;
+
+}
+
 h2 {
     color: #9b59b6;
 }

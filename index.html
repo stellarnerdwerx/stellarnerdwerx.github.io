@@ -20,14 +20,32 @@
         </p>
     </header>
 
-    <!-- <nav>
+    <nav>
         <ul>
             <li><a href="#movies">Movies</a></li>
             <li><a href="#games">Games</a></li>
             <li><a href="#boardgames">Board Games</a></li>
         </ul>
-    </nav> -->
+    </nav>
+    <script>
+        // Function to show the section corresponding to the clicked link
+        const navLinks = document.querySelectorAll('nav a');
+        const sections = document.querySelectorAll('section');
 
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(event) {
+                event.preventDefault(); // Prevent default link behavior
+                const targetId = link.getAttribute('href').substring(1); // Get section ID
+                sections.forEach(section => {
+                    if (section.id === targetId) {
+                        section.classList.add('active'); // Show the section
+                    } else {
+                        section.classList.remove('active'); // Hide other sections
+                    }
+                });
+            });
+        });
+    </script>
     <!-- Movies Section -->
     <section id="movies">
         <h2>Movies</h2>
