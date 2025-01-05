@@ -89,9 +89,9 @@
 
         // Function to search for movies by title, genre, and format
         async function searchMovies() {
-            const title = document.getElementById('movie-search').value.toLowerCase();
-            const genre = document.getElementById('movie-genre').value.toLowerCase();
-            const format = document.getElementById('movie-format').value;
+            var title = document.getElementById('movie-search').value.toLowerCase();
+            var genre = document.getElementById('movie-genre').value.toLowerCase();
+            var format = document.getElementById('movie-format').value;
 
             // Start building the WHERE clause
             let whereClause = "WHERE 1=1"; // Start with a condition that's always true
@@ -111,7 +111,7 @@
             // Run the SQL query to search for movies
             const query = `SELECT title, genres, year, runtime, rating, plot, cast, director FROM movies ${whereClause}`;
             const results = db.exec(query);
-
+            console.log(query)
             // Process and display the results
             if (results.length > 0) {
                 const movieList = results[0].values;
