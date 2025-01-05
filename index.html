@@ -231,7 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
         </ul>
     </section>
     <script>
-        // Function to search for vgames
+        // Function to search for video games
 function searchvgames() {
   try {
     if (!db) {
@@ -285,7 +285,7 @@ function searchvgames() {
         vgameList.appendChild(listItem);
       });
     } else {
-      vgameList.innerHTML = '<li class="no-results">No vgames found.</li>';
+      vgameList.innerHTML = '<li class="no-results">No video games found.</li>';
     }
   } catch (error) {
     console.error('Search error:', error);
@@ -316,8 +316,8 @@ document.addEventListener('DOMContentLoaded', () => {
     <section id="boardgames">
         <h2>Board Games</h2>
         <div class="search">
-            <input type="text" id="boardgame-search" placeholder="Search board games...">
-            <select id="boardgame-category">
+            <input type="text" id="bgame-search" placeholder="Search board games...">
+            <select id="bgame-category">
                 <option value="">Select Category</option>
                 <option value="Adventure">Adventure</option>
                 <option value="Cards">Cards</option>
@@ -333,11 +333,91 @@ document.addEventListener('DOMContentLoaded', () => {
             </select>
             <button onclick="searchBoardGames()">Search</button>
         </div>
-        <ul id="boardgame-list">
+        <ul id="bgame-list">
             <!-- Board game results will appear here -->
         </ul>
     </section>
-
+    <script>
+        // Function to search for bgames
+    function searchbgames() {
+    try {
+    if (!db) {
+      throw new Error('Database not loaded yet');
+    }
+    
+    const title = document.getElementById('bgame-search').value.toLowerCase();
+    const category = document.getElementById('bgame-category').value;
+    
+    let query = "SELECT * FROM games_board WHERE 1=1";
+    let conditions = [];
+    
+    if (title) {
+      conditions.push(`LOWER(title) LIKE '%${title}%'`);
+    }
+    
+    if (category && category !== '') {
+      conditions.push(`category LIKE '%${category.toLowerCase()}'`);
+    }
+    
+    if (conditions.length > 0) {
+      query += ` AND ${conditions.join(' AND ')}`;
+    }
+    
+    query += " ORDER BY title";
+    
+    // console.log('Executing query:', query);
+    const results = db.exec(query);
+    
+    const bgameList = document.getElementById('bgame-list');
+    bgameList.innerHTML = '';
+    
+    if (results && results.length > 0 && results[0].values.length > 0) {
+      const columns = results[0].columns;
+      
+      results[0].values.forEach(bgame => {
+        const listItem = document.createElement('li');
+        listItem.className = 'bgame-item';
+        
+        // Create an object mapping column names to values
+        const bgameData = {};
+        columns.forEach((col, index) => {
+          bgameData[col.toLowerCase()] = bgame[index];
+        });
+    
+        // Build the display HTML using the mapped data
+        listItem.innerHTML = `
+          <div class="bgame-title">${bgameData.title || ''}</div>
+        `;
+    
+        bgameList.appendChild(listItem);
+      });
+    } else {
+      bgameList.innerHTML = '<li class="no-results">No board games found.</li>';
+    }
+    } catch (error) {
+    console.error('Search error:', error);
+    document.getElementById('bgame-list').innerHTML = 
+      `<li class="error">Error: ${error.message}</li>`;
+    }
+    }
+    
+    // Add event listeners
+    document.addEventListener('DOMContentLoaded', () => {
+    loadDatabase();
+    
+    // Add event listeners for all search inputs
+    document.querySelector('button').addEventListener('click', searchbgames);
+    
+    document.getElementById('bgame-search').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      searchbgames();
+    }
+    });
+    
+    // Add change event listeners for dropdowns
+    document.getElementById('bgame-console').addEventListener('change', searchbgames);
+    });
+    </script>
     <footer>
         <p>&copy; 2025 PlayPickr. All rights reserved.</p>
     </footer>

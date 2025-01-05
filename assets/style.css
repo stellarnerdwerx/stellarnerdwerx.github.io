@@ -71,7 +71,9 @@ footer {
 
 
 /* Search Section Styles */
-#movies {
+#movies,
+#games,
+#boardgames {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
@@ -85,7 +87,9 @@ footer {
     flex-wrap: wrap;
 }
 
-#movie-search {
+#movie-search,
+#vgame-search,
+#bgame-search {
     flex: 1;
     min-width: 200px;
     padding: 8px 12px;
@@ -95,7 +99,9 @@ footer {
 }
 
 #movie-format,
-#movie-genre {
+#movie-genre,
+#vgame-console,
+#bgame-category {
     padding: 8px 12px;
     border: 1px solid #ddd;
     border-radius: 4px;
@@ -119,7 +125,9 @@ button:hover {
 }
 
 /* Results List Styles */
-#movie-list {
+#movie-list,
+#vgame-list,
+#bgame-list {
     list-style: none;
     padding: 0;
     margin: 0;
@@ -127,7 +135,9 @@ button:hover {
     gap: 20px;
 }
 
-.movie-item {
+.movie-item,
+.vgame-item,
+.bgame-item {
     background: white;
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -136,12 +146,16 @@ button:hover {
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.movie-item:hover {
+.movie-item:hover,
+.vgame-item:hover,
+.bgame-item:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-.movie-title {
+.movie-title,
+.vgame-title,
+.bgame-title {
     font-size: 1.4em;
     font-weight: bold;
     color: #333;
@@ -199,13 +213,19 @@ button:hover {
     }
 
     #movie-search,
+    #vgame-search,
+    #bgame-search,
     #movie-format,
+    #vgame-console,
+    #bgame-category,
     #movie-genre,
     button {
         width: 100%;
     }
 
-    .movie-item {
+    .movie-item,
+    .vgame-item,
+    .bgame-item {
         padding: 15px;
     }
 }
