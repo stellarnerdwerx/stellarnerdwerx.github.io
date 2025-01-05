@@ -230,6 +230,86 @@ document.addEventListener('DOMContentLoaded', () => {
             <!-- Game results will appear here -->
         </ul>
     </section>
+    <script>
+        // Function to search for games
+        function searchGames() {
+            try {
+                if (!db) {
+                    throw new Error('Database not loaded yet');
+                }
+    
+                const title = document.getElementById('game-search').value.toLowerCase();
+                const console = document.getElementById('game-console').value;
+    
+                let query = "SELECT * FROM games_video WHERE 1=1";
+                let conditions = [];
+    
+                if (title) {
+                    conditions.push(`LOWER(title) LIKE '%${title}%'`);
+                }
+    
+                if (console && console !== '') {
+                    conditions.push(`console = '${console}'`);
+                }
+    
+                if (conditions.length > 0) {
+                    query += ` AND ${conditions.join(' AND ')}`;
+                }
+    
+                query += " ORDER BY title";
+    
+                console.log('Executing query:', query);
+                const results = db.exec(query);
+    
+                const gameList = document.getElementById('game-list');
+                gameList.innerHTML = '';
+    
+                if (results && results.length > 0 && results[0].values.length > 0) {
+                    const columns = results[0].columns;
+    
+                    results[0].values.forEach(game => {
+                        const listItem = document.createElement('li');
+                        listItem.className = 'game-item';
+    
+                        const gameData = {};
+                        columns.forEach((col, index) => {
+                            gameData[col.toLowerCase()] = game[index];
+                        });
+    
+                        listItem.innerHTML = `
+                            <div class="game-title">${gameData.title || ''}</div>
+                            <div class="game-meta">
+                                <span>${gameData.console || ''}</span>
+                            </div>
+                        `;
+    
+                        gameList.appendChild(listItem);
+                    });
+                } else {
+                    gameList.innerHTML = '<li class="no-results">No games found.</li>';
+                }
+            } catch (error) {
+                console.error('Search error:', error);
+                document.getElementById('game-list').innerHTML = 
+                    `<li class="error">Error: ${error.message}</li>`;
+            }
+        }
+    
+        // Add event listeners for the Games Section
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add event listeners for all search inputs
+            document.querySelector('#games button').addEventListener('click', searchGames);
+    
+            document.getElementById('game-search').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    searchGames();
+                }
+            });
+    
+            // Add change event listeners for dropdowns
+            document.getElementById('game-console').addEventListener('change', searchGames);
+        });
+    </script>
 
     <!-- Board Games Section -->
     <section id="boardgames">
