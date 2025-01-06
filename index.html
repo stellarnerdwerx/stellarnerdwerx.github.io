@@ -165,17 +165,20 @@ function searchMovies() {
         });
 
         // Build the display HTML using the mapped data
+        const formats = columns.filter(col => (col === 'dvd'||col === 'bluray'||col === 'three_d'||col === 'four_k') && Number(movieData[col.toLowerCase()]) === 1).map(col => col);
         listItem.innerHTML = `
           <div class="movie-title">${movieData.title || ''}</div>
           <div class="movie-meta">
             <span>${movieData.year || ''} | Rating: ${movieData.rating || 'N/A'}</span>
           </div>
           <div class="movie-genres">${movieData.genres || ''}</div>
+          <div class="movie-format-list">
+            <strong>Available on: </strong>${formats.length > 0 ? formats.join(', ') : 'No formats available'}
+          </div>
           <div class="movie-plot">${movieData.plot || ''}</div>
           ${movieData.cast ? `<div class="movie-cast">Cast: ${movieData.cast}</div>` : ''}
           ${movieData.director ? `<div class="movie-director">Director: ${movieData.director}</div>` : ''}
         `;
-
         movieList.appendChild(listItem);
       });
     } else {
