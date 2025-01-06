@@ -88,6 +88,7 @@
         </div>
 
         <!-- Movie results will appear here -->
+        <div id="movie-result-count"></div>
         <ul id="movie-list"></ul>
     </section>
         <!-- SQLite.js Library -->
@@ -156,6 +157,10 @@ function searchMovies() {
     
     console.log('Executing query:', query);
     const results = db.exec(query);
+
+    // Update the result count display
+    const resultCountElement = document.getElementById('movie-result-count');
+    resultCountElement.innerHTML = `Found ${results.length} result${results.length !== 1 ? 's' : ''}`;
 
     const movieList = document.getElementById('movie-list');
     movieList.innerHTML = '';
@@ -260,6 +265,8 @@ document.addEventListener('DOMContentLoaded', () => {
             </select>
             <button onclick="searchvgames()">Search</button>
         </div>
+
+        <div id="vgame-result-count"></div>
         <ul id="vgame-list">
             <!-- Game results will appear here -->
         </ul>
@@ -294,6 +301,10 @@ function searchvgames() {
     
     console.log('Executing query:', query);
     const results = db.exec(query);
+
+    // Update the result count display
+    const resultCountElement = document.getElementById('vgame-result-count');
+    resultCountElement.innerHTML = `Found ${results.length} result${results.length !== 1 ? 's' : ''}`;
 
     const vgameList = document.getElementById('vgame-list');
     vgameList.innerHTML = '';
@@ -374,6 +385,8 @@ document.addEventListener('DOMContentLoaded', () => {
             </select>
             <button onclick="searchBoardGames()">Search</button>
         </div>
+
+        <div id="bgame-result-count"></div>
         <ul id="bgame-list">
             <!-- Board game results will appear here -->
         </ul>
@@ -406,9 +419,13 @@ document.addEventListener('DOMContentLoaded', () => {
     
     query += " ORDER BY title";
     
-    // console.log('Executing query:', query);
+    console.log('Executing query:', query);
     const results = db.exec(query);
-    
+
+    // Update the result count display
+    const resultCountElement = document.getElementById('bgame-result-count');
+    resultCountElement.innerHTML = `Found ${results.length} result${results.length !== 1 ? 's' : ''}`;
+
     const bgameList = document.getElementById('bgame-list');
     bgameList.innerHTML = '';
     

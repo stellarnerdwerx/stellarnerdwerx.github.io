@@ -180,7 +180,12 @@ button:hover {
     display: grid;
     gap: 20px;
 }
-
+#result-count {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 20px;
+    color: #3498db; /* Blue or another color that fits your theme */
+  }
 .movie-item,
 .vgame-item,
 .bgame-item {
