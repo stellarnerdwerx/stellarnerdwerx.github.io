@@ -259,7 +259,7 @@ function searchvgames() {
     }
 
     const title = document.getElementById('vgame-search').value.toLowerCase();
-    const console = document.getElementById('vgame-console').value;
+    const consoleVal = document.getElementById('vgame-console').value;
 
     let query = "SELECT * FROM games_video WHERE 1=1";
     let conditions = [];
@@ -268,8 +268,8 @@ function searchvgames() {
       conditions.push(`LOWER(title) LIKE '%${title}%'`);
     }
 
-    if (console && console !== '') {
-      conditions.push(`${console} = '1'`);
+    if (consoleVal && consoleVal !== '') {
+      conditions.push(`${consoleVal} = '1'`);
     }
 
     if (conditions.length > 0) {
@@ -278,7 +278,7 @@ function searchvgames() {
 
     query += " ORDER BY title";
     
-    // console.log('Executing query:', query);
+    console.log('Executing query:', query);
     const results = db.exec(query);
 
     const vgameList = document.getElementById('vgame-list');
