@@ -298,7 +298,7 @@ function searchvgames() {
         });
 
         // Build the display HTML using the mapped data
-        const consoles = columns.filter(col => col !== 'title' && vgameData[col.toLowerCase()] === 1).map(col => col);
+        const consoles = columns.filter(col => col !== 'title' && Number(vgameData[col.toLowerCase()]) === 1).map(col => col);
         console.log(consoles)
         listItem.innerHTML = `
           <div class="vgame-title">${vgameData.title || ''}</div>
