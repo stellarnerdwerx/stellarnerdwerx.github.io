@@ -183,7 +183,7 @@ function searchMovies() {
           </div>
           <div class="movie-genres">${movieData.genres || ''}</div>
           <div class="movie-format-list">
-            <span><strong>Available on: </strong>${formatsfinal.length > 0 ? formatsfinal.join(', ') : 'No formats available'}</span>
+            <span><strong>Available on: </strong>${formatsfinal.length > 0 ? formatsfinal.join(', ') : 'No formats available'}<br></span>
           </div>
           <div class="movie-plot">${movieData.plot || ''}</div>
           ${movieData.cast ? `<div class="movie-cast">Cast: ${movieData.cast}</div>` : ''}
@@ -312,11 +312,13 @@ function searchvgames() {
 
         // Build the display HTML using the mapped data
         const consoles = columns.filter(col => col !== 'title' && Number(vgameData[col.toLowerCase()]) === 1).map(col => col);
-        console.log(consoles)
+        var consolesfinal = consoles.map(consoles => consoles.replace('_', ' ').replace('THREE','3'));
+
+        console.log(consolesfinal)
         listItem.innerHTML = `
           <div class="vgame-title">${vgameData.title || ''}</div>
           <div class="vgame-console-list">
-            <strong>Available on: </strong>${consoles.length > 0 ? consoles.join(', ') : 'No consoles available'}
+            <strong>Available on: </strong>${consolesfinal.length > 0 ? consolesfinal.join(', ') : 'No consoles available'}
           </div>
         `;
 
@@ -460,7 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     </script>
     <footer>
-        <p>&copy; 2025 PlayPickr.</p>
+        <p>&copy; 2025 PlayPickr. 🎬🎮🎲</p>
     </footer>
 
 </body>

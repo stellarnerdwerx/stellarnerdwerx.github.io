@@ -31,25 +31,48 @@ header h1 {
     object-fit: cover; /* Ensures the image covers the entire width */
 }
 
+/* Main navigation styles */
+nav {
+    background: linear-gradient(135deg, #3498db, #1abc9c); /* Gradient background */
+    border-radius: 10px; /* Rounded corners */
+    padding: 10px 0; /* Top and bottom padding for extra space */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
+}
+
 nav ul {
     list-style-type: none;
     padding: 0;
-    text-align: center;
-    background-color: #3498db;
     margin: 0;
+    display: flex; /* Use flexbox for better alignment */
+    justify-content: center; /* Center the items horizontally */
+    align-items: center; /* Center the items vertically */
 }
+
 nav ul li {
-    display: inline;
-    margin: 0 1em;
+    margin: 0 1.5em;
 }
+
 nav ul li a {
     color: white;
     text-decoration: none;
     font-size: 1.2em;
+    font-weight: bold; /* Make the text bold */
+    padding: 5px 10px; /* Padding around the links */
+    border-radius: 5px; /* Rounded corners for the links */
+    transition: background-color 0.3s ease, transform 0.3s ease; /* Smooth transitions for hover effect */
 }
+
 nav ul li a:hover {
-    text-decoration: underline;
+    background-color: rgba(255, 255, 255, 0.2); /* Subtle background color change on hover */
+    transform: scale(1.1); /* Slight zoom-in effect */
+    text-decoration: none; /* Remove underline on hover */
 }
+
+/* Optional: Add a subtle hover effect on the list items */
+nav ul li:hover a {
+    color: #f39c12; /* Change color on hover */
+}
+
 h2 {
     color: #9b59b6;
 }
@@ -123,6 +146,7 @@ footer {
 
 #movie-format,
 #movie-genre,
+#movie-format-list,
 #vgame-console-list,
 #bgame-category {
     padding: 8px 12px;
