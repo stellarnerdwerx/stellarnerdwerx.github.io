@@ -175,7 +175,7 @@ function searchMovies() {
           </div>
           <div class="movie-genres">${movieData.genres || ''}</div>
           <div class="movie-format-list">
-            <span><strong>Available on: </strong>${formats.length > 0 ? formats.join(', ') : 'No formats available'}</span>
+            <span><strong>Available on: </strong>${formatsfinal.length > 0 ? formatsfinal.join(', ') : 'No formats available'}</span>
           </div>
           <div class="movie-plot">${movieData.plot || ''}</div>
           ${movieData.cast ? `<div class="movie-cast">Cast: ${movieData.cast}</div>` : ''}
