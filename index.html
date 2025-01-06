@@ -15,7 +15,7 @@
         </div>
         
         <!-- <h1>Welcome to PlayPickr!</h1> -->
-        <p style="font-family: 'American Typewriter', 'Courier New', Courier, monospace;">
+        <p style="font-family: 'Courier Prime', 'Roboto Mono', monospace; font-size: 1.1em; line-height: 1.6;">
             Explore our family's curated collection of movies, video games, and board games. Discover and enjoy our favorite entertainment from different eras and genres. Whether you're in the mood for a cinematic classic, retro video game or tabletop adventure, this is your guide to all of our favorites!
             <br>Start by selecting an option below.
         </p>
@@ -160,7 +160,7 @@ function searchMovies() {
 
     // Update the result count display
     const resultCountElementMovie = document.getElementById('movie-result-count');
-    resultCountElementMovie.innerHTML = `Found ${results[0].length} result${results[0].length !== 1 ? 's' : ''}`;
+    resultCountElementMovie.innerHTML = `Found ${results[0].values.length} result${results[0].values.length !== 1 ? 's' : ''}`;
 
     const movieList = document.getElementById('movie-list');
     movieList.innerHTML = '';
@@ -304,7 +304,7 @@ function searchvgames() {
 
     // Update the result count display
     const resultCountElementVgame = document.getElementById('vgame-result-count');
-    resultCountElementVgame.innerHTML = `Found ${results[0].length} result${results[0].length !== 1 ? 's' : ''}`;
+    resultCountElementVgame.innerHTML = `Found ${results[0].values.length} result${results[0].values.length !== 1 ? 's' : ''}`;
 
     const vgameList = document.getElementById('vgame-list');
     vgameList.innerHTML = '';
@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update the result count display
     const resultCountElementBgame = document.getElementById('bgame-result-count');
-    resultCountElementBgame.innerHTML = `Found ${results[0].length} result${results[0].length !== 1 ? 's' : ''}`;
+    resultCountElementBgame.innerHTML = `Found ${results[0].values.length} result${results[0].values.length !== 1 ? 's' : ''}`;
 
     const bgameList = document.getElementById('bgame-list');
     bgameList.innerHTML = '';
