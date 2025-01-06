@@ -187,7 +187,7 @@ function searchMovies() {
           </div><br>
           <div class="movie-plot">${movieData.plot || ''}</div>
           ${movieData.cast ? `<div class="movie-cast">Cast: ${movieData.cast.replace(/\|/g, ', ')}</div>` : ''}
-          ${movieData.director ? `<div class="movie-director">Director: ${movieData.director}</div>` : ''}
+          ${movieData.director ? `<div class="movie-director">Director: ${movieData.director.replace(/\|/g, ', ')}</div>` : ''}
         `;
         movieList.appendChild(listItem);
       });
