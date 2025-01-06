@@ -203,7 +203,8 @@ function searchMovies() {
   } catch (error) {
     console.error('Search error:', error);
     document.getElementById('movie-list').innerHTML = 
-      `<li class="error">Error: ${error.message}</li>`;
+    '<li class="no-results">No movies found.</li>';
+    //   `<li class="error">Error: ${error.message}</li>`;
   }
 }
 
@@ -342,7 +343,8 @@ function searchvgames() {
   } catch (error) {
     console.error('Search error:', error);
     document.getElementById('vgame-list').innerHTML = 
-      `<li class="error">Error: ${error.message}</li>`;
+    '<li class="no-results">No video games found.</li>';
+    //   `<li class="error">Error: ${error.message}</li>`;
   }
 }
 
@@ -458,7 +460,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (error) {
     console.error('Search error:', error);
     document.getElementById('bgame-list').innerHTML = 
-      `<li class="error">Error: ${error.message}</li>`;
+    '<li class="no-results">No board games found.</li>';
+    //   `<li class="error">Error: ${error.message}</li>`;
     }
     }
     
