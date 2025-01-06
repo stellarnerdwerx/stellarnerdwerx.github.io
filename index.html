@@ -29,18 +29,26 @@
     </nav>
     <script>
         function toggleSection(sectionId) {
-            // Get all sections
-            const sections = document.querySelectorAll('section');
-            
-            // Hide all sections
-            sections.forEach(section => {
-                section.style.display = 'none';
-            });
-    
-            // Show the clicked section
-            const sectionToShow = document.getElementById(sectionId);
-            sectionToShow.style.display = 'block';
-        }
+        // Get all sections
+        const sections = document.querySelectorAll('section');
+        
+        // Hide all sections
+        sections.forEach(section => {
+            section.style.display = 'none';
+        });
+        
+        // Clear content from all sections
+        sections.forEach(section => {
+            const list = section.querySelector('ul');
+            if (list) {
+                list.innerHTML = ''; // Clear the list items
+            }
+    });
+
+    // Show the clicked section
+    const sectionToShow = document.getElementById(sectionId);
+    sectionToShow.style.display = 'block';
+}
     </script>
     <!-- Movies Section -->
     <section id="movies" style="display:none">
@@ -166,7 +174,7 @@ function searchMovies() {
 
         // Build the display HTML using the mapped data
         const formats = columns.filter(col => (col === 'dvd'||col === 'bluray'||col === 'three_d'||col === 'four_k') && Number(movieData[col.toLowerCase()]) === 1).map(col => col);
-        var formatsfinal = formats.map(formats => formats.replace('three_d', '3D').replace('blu_ray','Blu-Ray').replace('dvd','DVD').replace('four_k','4K'));
+        var formatsfinal = formats.map(formats => formats.replace('three_d', '3D').replace('bluray','Blu-Ray').replace('dvd','DVD').replace('four_k','4K'));
 
         listItem.innerHTML = `
           <div class="movie-title">${movieData.title || ''}</div>
