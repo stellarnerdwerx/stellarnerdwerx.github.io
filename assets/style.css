@@ -34,7 +34,6 @@ header h1 {
 /* Main navigation styles */
 nav {
     background: linear-gradient(135deg, #3498db, #1abc9c); /* Gradient background */
-    border-radius: 10px; /* Rounded corners */
     padding: 10px 0; /* Top and bottom padding for extra space */
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Soft shadow for depth */
 }
@@ -70,7 +69,7 @@ nav ul li a:hover {
 
 /* Optional: Add a subtle hover effect on the list items */
 nav ul li:hover a {
-    color: #f39c12; /* Change color on hover */
+    color: #27ae60; /* Change color on hover */
 }
 
 h2 {
