@@ -6,7 +6,7 @@
     <link rel="stylesheet" href="assets/style.css">
     <link rel="apple-touch-icon" href="assets/icon.jpg">
     <link rel="icon" href="assets/icon.jpg" type="image/x-icon">
-    <title>PlayPickr</title>
+    <title>StellarSearch</title>
 </head>
 <script src="https://cdn.jsdelivr.net/npm/sql.js@1.12.0/dist/sql-wasm.min.js"></script>
 <body>
@@ -15,7 +15,7 @@
             <img src="assets/banner.png" alt="Banner showcasing movies, retro video games, and board games" />
         </div>
         
-        <!-- <h1>Welcome to PlayPickr!</h1> -->
+        <!-- <h1>Welcome to StellarSearch!</h1> -->
         <p style="font-family: 'Courier Prime', 'Roboto Mono', monospace; font-size: 1.1em; line-height: 1.6;">
             Explore our family's curated collection of movies, video games, and board games. Discover and enjoy our favorite entertainment from different eras and genres. Whether you're in the mood for a cinematic classic, retro video game or tabletop adventure, this is your guide to all of our favorites!
             <br><br>Start by selecting an option below.
@@ -106,7 +106,7 @@ let db;
 async function loadDatabase() {
   try {
     const SQL = await initSqlJs(sqlConfig);
-    const response = await fetch('assets/playpickr.db');
+    const response = await fetch('assets/stellarsearch.db');
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -484,7 +484,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     </script>
     <footer>
-        <p>&copy; 2025 PlayPickr. 🎬🎮🎲</p>
+        <p>&copy; 2025 StellarSearch. 🎬🎮🎲</p>
     </footer>
 
 </body>
