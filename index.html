@@ -160,7 +160,7 @@ function searchMovies() {
 
     // Update the result count display
     const resultCountElementMovie = document.getElementById('movie-result-count');
-    resultCountElementMovie.innerHTML = `Found ${results.length} result${results.length !== 1 ? 's' : ''}`;
+    resultCountElementMovie.innerHTML = `Found ${results[0].length} result${results[0].length !== 1 ? 's' : ''}`;
 
     const movieList = document.getElementById('movie-list');
     movieList.innerHTML = '';
@@ -304,7 +304,7 @@ function searchvgames() {
 
     // Update the result count display
     const resultCountElementVgame = document.getElementById('vgame-result-count');
-    resultCountElementVgame.innerHTML = `Found ${results.length} result${results.length !== 1 ? 's' : ''}`;
+    resultCountElementVgame.innerHTML = `Found ${results[0].length} result${results[0].length !== 1 ? 's' : ''}`;
 
     const vgameList = document.getElementById('vgame-list');
     vgameList.innerHTML = '';
@@ -424,7 +424,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update the result count display
     const resultCountElementBgame = document.getElementById('bgame-result-count');
-    resultCountElementBgame.innerHTML = `Found ${results.length} result${results.length !== 1 ? 's' : ''}`;
+    resultCountElementBgame.innerHTML = `Found ${results[0].length} result${results[0].length !== 1 ? 's' : ''}`;
 
     const bgameList = document.getElementById('bgame-list');
     bgameList.innerHTML = '';
