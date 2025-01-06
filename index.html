@@ -312,7 +312,7 @@ function searchvgames() {
 
         // Build the display HTML using the mapped data
         const consoles = columns.filter(col => col !== 'title' && Number(vgameData[col.toLowerCase()]) === 1).map(col => col);
-        var consolesfinal = consoles.map(consoles => consoles.replace('_', ' ').replace('THREE','3'));
+        var consolesfinal = consoles.map(consoles => consoles.replace('_', ' ').replace('THREE ','3'));
 
         console.log(consolesfinal)
         listItem.innerHTML = `
