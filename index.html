@@ -184,7 +184,7 @@ function searchMovies() {
           <div class="movie-genres">${movieData.genres || ''}</div>
           <div class="movie-format-list">
             <span><strong>Available on: </strong>${formatsfinal.length > 0 ? formatsfinal.join(', ') : 'No formats available'}</span>
-          </div><br><br>
+          </div><br>
           <div class="movie-plot">${movieData.plot || ''}</div>
           ${movieData.cast ? `<div class="movie-cast">Cast: ${movieData.cast}</div>` : ''}
           ${movieData.director ? `<div class="movie-director">Director: ${movieData.director}</div>` : ''}
