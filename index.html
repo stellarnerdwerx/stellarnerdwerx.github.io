@@ -493,7 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
       query += " AND " + conditions.join(" AND ");
     }
 
-    query += " ORDER BY Name";
+    query += " ORDER BY name";
 
     console.log('Executing query:', query);
     const results = db.exec(query);
