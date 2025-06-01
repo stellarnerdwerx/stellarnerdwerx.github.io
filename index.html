@@ -452,19 +452,17 @@ document.addEventListener('DOMContentLoaded', () => {
   try {
     if (!db) {
       throw new Error('Database not loaded yet');
-    }const schemaResults = db.exec("PRAGMA table_info(games_board)");
+    }
 
-if (schemaResults.length > 0) {
-  // The first result contains the info about columns
-  const columns = schemaResults[0].values;
 
-  console.log("Columns in games_board:");
-  columns.forEach(col => {
-    // col is an array where
-    // col[1] is the column name,
-    // col[2] is the data type
-    console.log(`- ${col[1]} (${col[2]})`);
-  });}
+    const fields = db.exec("SELECT * FROM games_board LIMIT 1");
+  
+    if (fields.length > 0) {
+      // results[0].columns is an array of column names
+      console.log("Columns in games_board:", fields[0].columns);
+    } else {
+      console.log("No data found in games_board");
+    }
 
     const title = document.getElementById('bgame-search').value.toLowerCase();
     const category = document.getElementById('bgame-category').value;
