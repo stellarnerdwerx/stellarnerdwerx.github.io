@@ -194,7 +194,37 @@ button:hover {
   .movie-content {
     padding-top: 8px;
   }
-
+/* Hide default arrow */
+details summary {
+    list-style: none;
+  }
+  
+  details summary::-webkit-details-marker {
+    display: none;
+  }
+  
+  /* Layout for summary content */
+  .summary-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  /* Custom arrow */
+  .custom-arrow {
+    border: solid #555;
+    border-width: 0 2px 2px 0;
+    display: inline-block;
+    padding: 5px;
+    transform: rotate(45deg);
+    transition: transform 0.2s ease;
+  }
+  
+  /* Rotate arrow when open */
+  details[open] .custom-arrow {
+    transform: rotate(-135deg);
+  }
+  
 
 #movie-list,
 #vgame-list,

@@ -206,11 +206,17 @@ function searchMovies() {
         listItem.innerHTML = `
           <details class="movie-tile">
             <summary>
-              <div class="movie-title">${movieData.title || ''}</div>
-              <div class="movie-meta">
-                <span>${movieData.year || ''} | Rating: ${movieData.rating || 'N/A'}</span>
+              <div class="summary-content">
+                <div>
+                  <div class="movie-title">${movieData.title || ''}</div>
+                  <div class="movie-meta">
+                    <span>${movieData.year || ''} | Rating: ${movieData.rating || 'N/A'}</span>
+                  </div>
+                </div>
+                <span class="custom-arrow"></span>
               </div>
             </summary>
+
             <div class="movie-content">
               <div class="movie-genres">${movieData.genres || ''}</div>
               <div class="movie-format-list">
