@@ -28,7 +28,7 @@
         
         <!-- <h1>Welcome to StellarSearch!</h1> -->
         <p style="font-family: 'Courier Prime', 'Roboto Mono', monospace; font-size: 1.1em; line-height: 1.6;">
-            Explore our family's curated collection of movies, video games, and board games. Discover and enjoy our favorite entertainment from different eras and genres. Whether you're in the mood for a cinematic classic, retro video game or tabletop adventure, this is your guide to all of our favorites!
+            Explore our family's curated collection of physical media which includes movies, video games, and board games. Discover and enjoy our favorite entertainment from different eras and genres. Whether you're in the mood for a cinematic classic, retro video game or tabletop adventure, this is your guide to all of our favorites!
             <br><br>Start by selecting an option below.
         </p>
     </header>
@@ -463,20 +463,20 @@ document.addEventListener('DOMContentLoaded', () => {
     let conditions = [];
 
     if (title) {
-      conditions.push(`LOWER(Name) LIKE '%${title}%'`);
+      conditions.push(`LOWER([Name]) LIKE '%${title}%'`);
     }
 
     if (category && category !== '') {
-      conditions.push(`LOWER(Category) LIKE '%${category.toLowerCase()}%'`);
+      conditions.push(`LOWER([Category]) LIKE '%${category.toLowerCase()}%'`);
     }
 
     if (time) {
       if (time === "under30") {
-        conditions.push(`( ("Min Play Time" IS NOT NULL AND "Min Play Time" < 30) OR ("Max Play Time" IS NOT NULL AND "Max Play Time" < 30) )`);
+        conditions.push(`( ([Min Play Time] IS NOT NULL AND [Min Play Time] < 30) OR ([Max Play Time] IS NOT NULL AND [Max Play Time] < 30) )`);
       } else if (time === "30to60") {
-        conditions.push(`( ("Min Play Time" BETWEEN 30 AND 60) OR ("Max Play Time" BETWEEN 30 AND 60) )`);
+        conditions.push(`( ([Min Play Time] BETWEEN 30 AND 60) OR ([Max Play Time] BETWEEN 30 AND 60) )`);
       } else if (time === "over60") {
-        conditions.push(`( ("Min Play Time" IS NOT NULL AND "Min Play Time" > 60) OR ("Max Play Time" IS NOT NULL AND "Max Play Time" > 60) )`);
+        conditions.push(`( ([Min Play Time] IS NOT NULL AND [Min Play Time] > 60) OR ([Max Play Time] IS NOT NULL AND [Max Play Time] > 60) )`);
       }
     }
 
@@ -493,7 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
       query += " AND " + conditions.join(" AND ");
     }
 
-    query += " ORDER BY name";
+    query += " ORDER BY [Name]";
 
     console.log('Executing query:', query);
     const results = db.exec(query);
