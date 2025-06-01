@@ -191,22 +191,38 @@ function searchMovies() {
         });
 
         // Build the display HTML using the mapped data
-        const formats = columns.filter(col => (col === 'dvd'||col === 'bluray'||col === 'three_d'||col === 'four_k') && Number(movieData[col.toLowerCase()]) === 1).map(col => col);
-        var formatsfinal = formats.map(formats => formats.replace('three_d', '3D').replace('bluray','Blu-Ray').replace('dvd','DVD').replace('four_k','4K'));
+        const formats = columns
+          .filter(col => (col === 'dvd' || col === 'bluray' || col === 'three_d' || col === 'four_k') && Number(movieData[col.toLowerCase()]) === 1)
+          .map(col => col);
+
+        const formatsfinal = formats.map(format =>
+          format
+            .replace('three_d', '3D')
+            .replace('bluray', 'Blu-Ray')
+            .replace('dvd', 'DVD')
+            .replace('four_k', '4K')
+        );
 
         listItem.innerHTML = `
-          <div class="movie-title">${movieData.title || ''}</div>
-          <div class="movie-meta">
-            <span>${movieData.year || ''} | Rating: ${movieData.rating || 'N/A'}</span>
-          </div>
-          <div class="movie-genres">${movieData.genres || ''}</div>
-          <div class="movie-format-list">
-            <span><strong>Available on: </strong>${formatsfinal.length > 0 ? formatsfinal.join(', ') : 'No formats available'}</span>
-          </div><br>
-          <div class="movie-plot">${movieData.plot || ''}</div>
-          ${movieData.cast ? `<div class="movie-cast">Cast: ${movieData.cast.replace(/\|/g, ', ')}</div>` : ''}
-          ${movieData.director ? `<div class="movie-director">Director: ${movieData.director.replace(/\|/g, ', ')}</div>` : ''}
+          <details class="movie-tile">
+            <summary>
+              <div class="movie-title">${movieData.title || ''}</div>
+              <div class="movie-meta">
+                <span>${movieData.year || ''} | Rating: ${movieData.rating || 'N/A'}</span>
+              </div>
+            </summary>
+            <div class="movie-content">
+              <div class="movie-genres">${movieData.genres || ''}</div>
+              <div class="movie-format-list">
+                <span><strong>Available on: </strong>${formatsfinal.length > 0 ? formatsfinal.join(', ') : 'No formats available'}</span>
+              </div><br>
+              <div class="movie-plot">${movieData.plot || ''}</div>
+              ${movieData.cast ? `<div class="movie-cast">Cast: ${movieData.cast.replace(/\|/g, ', ')}</div>` : ''}
+              ${movieData.director ? `<div class="movie-director">Director: ${movieData.director.replace(/\|/g, ', ')}</div>` : ''}
+            </div>
+          </details>
         `;
+
         movieList.appendChild(listItem);
       });
     } else if (results[0].values.length === 0) {

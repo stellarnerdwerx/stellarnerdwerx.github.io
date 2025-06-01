@@ -171,6 +171,31 @@ button:hover {
 }
 
 /* Results List Styles */
+.movie-tile {
+    background: #fff;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .movie-tile summary {
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .movie-tile[open] summary {
+    margin-bottom: 10px;
+  }
+  
+  .movie-content {
+    padding-top: 8px;
+  }
+
+
 #movie-list,
 #vgame-list,
 #bgame-list {
