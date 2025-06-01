@@ -522,7 +522,7 @@ document.addEventListener('DOMContentLoaded', () => {
             <summary>
               <div class="bgame-summary-content">
                 <div>
-                  <div class="bgame-title">${bgameData["name"] || ''}</div>
+                  <div class="bgame-title">${bgameData["title"] || ''}</div>
                   <div class="bgame-meta">
                     <span>${bgameData["category"] || ''}</span>
                   </div>
@@ -531,9 +531,9 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>
             </summary>
             <div class="bgame-content">
-              <div><strong>Players:</strong> ${bgameData["min players"]}–${bgameData["max players"]}</div>
-              <div><strong>Min Age:</strong> ${bgameData["min age"]}+</div>
-              <div><strong>Play Time:</strong> ${bgameData["min play time"] || '?'}–${bgameData["max play time"] || '?'} min</div>
+              <div><strong>Players:</strong> ${bgameData["min_players"]}–${bgameData["max_players"]}</div>
+              <div><strong>Min Age:</strong> ${bgameData["min_age"]}+</div>
+              <div><strong>Play Time:</strong> ${bgameData["min_play_time"] || '?'}–${bgameData["max_play_time"] || '?'} min</div>
             </div>
           </details>
         `;
