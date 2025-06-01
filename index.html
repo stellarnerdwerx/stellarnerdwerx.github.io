@@ -463,11 +463,11 @@ document.addEventListener('DOMContentLoaded', () => {
     let conditions = [];
 
     if (title) {
-      conditions.push(`LOWER(name) LIKE '%${title}%'`);
+      conditions.push(`LOWER(Name) LIKE '%${title}%'`);
     }
 
     if (category && category !== '') {
-      conditions.push(`LOWER(category) LIKE '%${category.toLowerCase()}%'`);
+      conditions.push(`LOWER(Category) LIKE '%${category.toLowerCase()}%'`);
     }
 
     if (time) {
@@ -493,7 +493,7 @@ document.addEventListener('DOMContentLoaded', () => {
       query += " AND " + conditions.join(" AND ");
     }
 
-    query += " ORDER BY name";
+    query += " ORDER BY Name";
 
     console.log('Executing query:', query);
     const results = db.exec(query);
