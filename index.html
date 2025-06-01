@@ -584,14 +584,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (time) {
       if (time === "under30") {
-        conditions.push(`CAST(max_play_time AS INTEGER) > 0 AND CAST(max_play_time AS INTEGER) < 30`);
+        conditions.push(`( max_play_time IS NOT NULL AND max_play_time < 30 )`);
       } else if (time === "30to60") {
-        conditions.push(`CAST(min_play_time AS INTEGER) >= 30 AND CAST(max_play_time AS INTEGER) <= 60`);
+        conditions.push(`( (min_play_time BETWEEN 30 AND 60) and (max_play_time BETWEEN 30 AND 60) )`);
       } else if (time === "over60") {
-        conditions.push(`CAST(min_play_time AS INTEGER) > 60`);
+        conditions.push(`( (min_play_time IS NOT NULL AND min_play_time > 60) )`);
       }
     }
-
 
     if (players) {
       if (players === "5+") {
