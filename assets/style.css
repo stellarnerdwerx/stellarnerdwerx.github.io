@@ -9,7 +9,7 @@ header {
     background-color: #9b59b6;
     color: white;
     text-align: center;
-    padding: 2em 0;
+    padding: 0;
 }
 header h1 {
     margin: 0;
@@ -17,19 +17,20 @@ header h1 {
 
 #banner {
     width: 100%;
-    height: auto;
+    max-height: 625px; /* Adjust this value to your preferred height */
     overflow: hidden;
-    background-color: #2c2c54; /* Fallback background color in case the image doesn't load */
+    background-color: #2c2c54;
     display: flex;
-    justify-content: center; /* Center the image horizontally */
-    align-items: center; /* Center the image vertically */
+    justify-content: center;
+    align-items: center;
 }
 
 #banner img {
     width: 100%;
     height: auto;
-    object-fit: cover; /* Ensures the image covers the entire width */
+    object-fit: cover;
 }
+
 
 /* Main navigation styles */
 nav {
