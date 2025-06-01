@@ -472,20 +472,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (time) {
       if (time === "under30") {
-        conditions.push(`( (min_play_time IS NOT NULL AND min_play_time < 30) OR (max_play_time IS NOT NULL AND max_play_time < 30) )`);
+        conditions.push(`( ("Min Play Time" IS NOT NULL AND "Min Play Time" < 30) OR ("Max Play Time" IS NOT NULL AND "Max Play Time" < 30) )`);
       } else if (time === "30to60") {
-        conditions.push(`( (min_play_time BETWEEN 30 AND 60) OR (max_play_time BETWEEN 30 AND 60) )`);
+        conditions.push(`( ("Min Play Time" BETWEEN 30 AND 60) OR ("Max Play Time" BETWEEN 30 AND 60) )`);
       } else if (time === "over60") {
-        conditions.push(`( (min_play_time IS NOT NULL AND min_play_time > 60) OR (max_play_time IS NOT NULL AND max_play_time > 60) )`);
+        conditions.push(`( ("Min Play Time" IS NOT NULL AND "Min Play Time" > 60) OR ("Max Play Time" IS NOT NULL AND "Max Play Time" > 60) )`);
       }
     }
 
     if (players) {
       if (players === "5+") {
-        conditions.push("max_players >= 5");
+        conditions.push("[Max Players] >= 5");
       } else {
         const playerCount = parseInt(players, 10);
-        conditions.push(`min_players <= ${playerCount} AND max_players >= ${playerCount}`);
+        conditions.push(`[Min Players] <= ${playerCount} AND [Max Players] >= ${playerCount}`);
       }
     }
 
