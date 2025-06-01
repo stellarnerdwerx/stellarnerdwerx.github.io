@@ -402,90 +402,142 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <!-- Board Games Section -->
     <section id="boardgames" style="display:none">
-        <h2>Board Games</h2>
-        <div class="search">
-            <input type="text" id="bgame-search" placeholder="Search board games...">
-            <select id="bgame-category">
-                <option value="">Select Category</option>
-                <option value="Adventure">Adventure</option>
-                <option value="Cards">Cards</option>
-                <option value="Children">Children</option>
-                <option value="Deck-building">Deck-building</option>
-                <option value="Dice">Dice</option>
-                <option value="Expansion">Expansion</option>
-                <option value="Family">Family</option>
-                <option value="Party">Party</option>
-                <option value="Puzzle">Puzzle</option>
-                <option value="Strategy">Strategy</option>
-                <option value="Thematic">Thematic</option>
-            </select>
-            <button onclick="searchBoardGames()">Search</button>
-        </div>
+      <h2>Board Games</h2>
+      <div class="search">
+          <input type="text" id="bgame-search" placeholder="Search board games...">
 
-        <div id="bgame-result-count"></div>
-        <ul id="bgame-list">
-            <!-- Board game results will appear here -->
-        </ul>
+          <select id="bgame-category">
+              <option value="">Select Category</option>
+              <option value="Adventure">Adventure</option>
+              <option value="Cards">Cards</option>
+              <option value="Children">Children</option>
+              <option value="Deck-building">Deck-building</option>
+              <option value="Dice">Dice</option>
+              <option value="Expansion">Expansion</option>
+              <option value="Family">Family</option>
+              <option value="Party">Party</option>
+              <option value="Puzzle">Puzzle</option>
+              <option value="Strategy">Strategy</option>
+              <option value="Thematic">Thematic</option>
+          </select>
+
+          <!-- New: Play Time filter -->
+          <select id="bgame-time">
+              <option value="">Any Play Time</option>
+              <option value="under30">Under 30 minutes</option>
+              <option value="30to60">30 to 60 minutes</option>
+              <option value="over60">Over 60 minutes</option>
+          </select>
+
+          <!-- New: Player Count filter -->
+          <select id="bgame-players">
+              <option value="">Any Player Count</option>
+              <option value="1">1 Player</option>
+              <option value="2">2 Players</option>
+              <option value="3">3 Players</option>
+              <option value="4">4 Players</option>
+              <option value="5+">5 or more Players</option>
+          </select>
+
+          <button onclick="searchbgames()">Search</button>
+      </div>
+
+      <div id="bgame-result-count"></div>
+      <ul id="bgame-list"></ul>
     </section>
+
     <script>
         // Function to search for bgames
-    function searchbgames() {
-    try {
+        function searchbgames() {
+  try {
     if (!db) {
       throw new Error('Database not loaded yet');
     }
-    
+
     const title = document.getElementById('bgame-search').value.toLowerCase();
     const category = document.getElementById('bgame-category').value;
-    
+    const time = document.getElementById('bgame-time').value;
+    const players = document.getElementById('bgame-players').value;
+
     let query = "SELECT * FROM games_board WHERE 1=1";
     let conditions = [];
-    
+
     if (title) {
-      conditions.push(`LOWER(title) LIKE '%${title}%'`);
+      conditions.push(`LOWER(name) LIKE '%${title}%'`);
     }
-    
+
     if (category && category !== '') {
-      conditions.push(`category LIKE '%${category.toLowerCase()}'`);
+      conditions.push(`LOWER(category) LIKE '%${category.toLowerCase()}%'`);
     }
-    
+
+    if (time) {
+      if (time === "under30") {
+        conditions.push(`( (min_play_time IS NOT NULL AND min_play_time < 30) OR (max_play_time IS NOT NULL AND max_play_time < 30) )`);
+      } else if (time === "30to60") {
+        conditions.push(`( (min_play_time BETWEEN 30 AND 60) OR (max_play_time BETWEEN 30 AND 60) )`);
+      } else if (time === "over60") {
+        conditions.push(`( (min_play_time IS NOT NULL AND min_play_time > 60) OR (max_play_time IS NOT NULL AND max_play_time > 60) )`);
+      }
+    }
+
+    if (players) {
+      if (players === "5+") {
+        conditions.push("max_players >= 5");
+      } else {
+        const playerCount = parseInt(players, 10);
+        conditions.push(`min_players <= ${playerCount} AND max_players >= ${playerCount}`);
+      }
+    }
+
     if (conditions.length > 0) {
-      query += ` AND ${conditions.join(' AND ')}`;
+      query += " AND " + conditions.join(" AND ");
     }
-    
-    query += " ORDER BY title";
-    
+
+    query += " ORDER BY name";
+
     console.log('Executing query:', query);
     const results = db.exec(query);
 
-    // Update the result count display
     const resultCountElementBgame = document.getElementById('bgame-result-count');
-    resultCountElementBgame.innerHTML = `Collection contains ${results[0].values.length} board game${results[0].values.length !== 1 ? 's' : ''}`;
-
     const bgameList = document.getElementById('bgame-list');
     bgameList.innerHTML = '';
-    
+
     if (results && results.length > 0 && results[0].values.length > 0) {
+      const count = results[0].values.length;
+      resultCountElementBgame.innerHTML = `Collection contains ${count} board game${count !== 1 ? 's' : ''}`;
+
       const columns = results[0].columns;
-      
+
       results[0].values.forEach(bgame => {
         const listItem = document.createElement('li');
         listItem.className = 'bgame-item';
-        
-        // Create an object mapping column names to values
+
         const bgameData = {};
         columns.forEach((col, index) => {
           bgameData[col.toLowerCase()] = bgame[index];
         });
-    
-        // Build the display HTML using the mapped data
+
         listItem.innerHTML = `
-          <div class="bgame-title">${bgameData.title || ''}</div>
-          <div class="bgame-meta">
-            <span>${bgameData.category || ''}</span>
-          </div>
+          <details class="bgame-tile">
+            <summary>
+              <div class="bgame-summary-content">
+                <div>
+                  <div class="bgame-title">${bgameData["name"] || ''}</div>
+                  <div class="bgame-meta">
+                    <span>${bgameData["category"] || ''}</span>
+                  </div>
+                </div>
+                <span class="bgame-arrow"></span>
+              </div>
+            </summary>
+            <div class="bgame-content">
+              <div><strong>Players:</strong> ${bgameData["min players"]}–${bgameData["max players"]}</div>
+              <div><strong>Min Age:</strong> ${bgameData["min age"]}+</div>
+              <div><strong>Play Time:</strong> ${bgameData["min play time"] || '?'}–${bgameData["max play time"] || '?'} min</div>
+            </div>
+          </details>
         `;
-    
+
         bgameList.appendChild(listItem);
       });
     } else if (results[0].values.length === 0) {
