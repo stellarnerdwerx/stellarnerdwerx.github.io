@@ -4,6 +4,8 @@ body {
     color: #34495e;
     margin: 0;
     padding: 0;
+    margin-right: 350px; /* Leave space for chatbot panel */
+
 }
 header {
     background-color: #9b59b6;
@@ -390,3 +392,54 @@ details summary {
         padding: 15px;
     }
 }
+/* Chatbot Panel Styles */
+#chatbot-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    height: 100vh;
+    width: 30px;
+    background: #fff;
+    border-left: 1px solid #ccc;
+    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    z-index: 9999;
+    font-family: Arial, sans-serif;
+  }
+  
+  #chatbot-panel h3 {
+    margin-top: 0;
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+  
+  #chat-box {
+    flex-grow: 1;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    background: #f9f9f9;
+    font-size: 0.9rem;
+  }
+  
+  #user-input {
+    padding: 0.5rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    margin-bottom: 0.5rem;
+  }
+  
+  #chat-send-btn {
+    padding: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    background-color: #4a90e2;
+    border: none;
+    color: white;
+    border-radius: 3px;
+  }
+  

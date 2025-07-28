@@ -568,6 +568,59 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('bgame-category').addEventListener('change', searchbgames);
     });
     </script>
+
+
+    <!-- Chatbot Panel -->
+<div id="chatbot-panel">
+  <h3>The Curator</h3>
+  <div id="chat-box"></div>
+  <input id="user-input" type="text" placeholder="Ask a question..." />
+  <button id="chat-send-btn">Ask</button>
+</div>
+
+
+<script>
+  async function sendMessage() {
+    const inputElem = document.getElementById("user-input");
+    const chatBox = document.getElementById("chat-box");
+    const userInput = inputElem.value.trim();
+    if (!userInput) return;
+
+    // Show user message
+    chatBox.innerHTML += `<p><strong>You:</strong> ${userInput}</p>`;
+    inputElem.value = "";
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    try {
+      const response = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: userInput })
+      });
+
+      if (!response.ok) {
+        chatBox.innerHTML += `<p><em>Error from server: ${response.statusText}</em></p>`;
+        return;
+      }
+
+      const data = await response.json();
+      chatBox.innerHTML += `<p><strong>Bot:</strong> ${data.response}</p>`;
+      chatBox.scrollTop = chatBox.scrollHeight;
+    } catch (error) {
+      chatBox.innerHTML += `<p><em>Network error: ${error.message}</em></p>`;
+    }
+  }
+
+  document.getElementById("user-input").addEventListener("keypress", function (e) {
+  if (e.key === "Enter") {
+    sendMessage();
+  }
+});
+
+</script>
+
+
+
     <footer>
         <p>&copy; 2025 StellarSearch. 🎬🎮🎲</p>
     </footer>

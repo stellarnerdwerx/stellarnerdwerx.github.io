@@ -5,17 +5,17 @@ import openai
 from sentence_transformers import SentenceTransformer
 import chromadb
 
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
+# quiet annoying warnings
+import warnings
+from urllib3.exceptions import NotOpenSSLWarning
+warnings.filterwarnings("ignore", category=NotOpenSSLWarning)
 
-
-# --- Config ---
-CHROMA_DB_PATH = "/Users/lena/Documents/DATABASES/chroma_db"
-COLLECTION_NAME = "faq_collection"
-EMBEDDING_MODEL = "all-MiniLM-L6-v2"
-TOP_K = 5
-OPENAI_MODEL = "gpt-3.5-turbo"  
+# config
+from config import CHROMA_DB_PATH, COLLECTION_NAME, EMBEDDING_MODEL, TOP_K, OPENAI_MODEL
 
 # Get key from env
+from dotenv import load_dotenv
+load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 def load_model():
@@ -38,8 +38,8 @@ def build_prompt(query, context_chunks):
     context_text = "\n\n".join(context_chunks)
     return f"""You are a helpful assistant that knows about my personal movie collection.
     
-The following context comes from my personal database of movies that my family own. 
-Each entry represents a movie I have in one or more formats (DVD, Blu-Ray, 4K, etc).
+The following context comes from my personal database of movies that my family owns. 
+Each entry represents a movie I have in one or more formats (DVD, Blu-Ray, 4K, etc) and includes information sourced from places like IMDb and Rotten Tomatoes.
 
 Context:
 {context_text}
@@ -57,7 +57,7 @@ def ask_llm(prompt, model=OPENAI_MODEL):
         {"role": "system", "content": "You are a helpful assistant that answers based on the given context only."},
         {"role": "user", "content": prompt}
     ],
-    temperature=0.3
+    temperature=0.7
 )
 
     answer = response.choices[0].message.content
@@ -67,17 +67,17 @@ def chat():
     model = load_model()
     collection = load_collection()
 
-    print("🎬 MovieBot is ready. Ask anything about your movie collection!\n")
+    print("🎬 The Curator is ready. Ask anything about your movie collection!\n")
 
     while True:
         user_input = input("You: ")
-        if user_input.lower() in ['exit', 'quit']:
+        if user_input.lower() in ['exit', 'quit', 'bye']:
             break
 
         context_chunks, _ = retrieve_context(user_input, model, collection)
         prompt = build_prompt(user_input, context_chunks)
         answer = ask_llm(prompt)
-        print("\n🎥 MovieBot:", answer)
+        print("\n🎥 The Curator:", answer)
         print("-" * 60)
 
 if __name__ == "__main__":

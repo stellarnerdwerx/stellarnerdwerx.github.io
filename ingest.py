@@ -4,17 +4,11 @@ import chromadb
 import uuid #ids for chunks
 from io import StringIO
 
-import os
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
-
-#configuration
-PATH = '/Users/lena/Documents/DATABASES/'
-DATA_PATH = PATH+'movies_with_info_20250601.csv'
-CHROMA_DB_PATH = PATH+'chroma_db'# Path to store the chromadb
-COLLECTION_NAME = "faq_collection" # Name of the collection in 
-EMBEDDING_MODEL = 'all-MiniLM-L6-v2' # A good starting sentence transformer model
+# config
+from config import PATH, DATA_PATH, CHROMA_DB_PATH, COLLECTION_NAME, EMBEDDING_MODEL
 
 def load_data(file_path):
+    """read in the movie data, ignore junk chars"""
     with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
         content = f.read()
     df = pd.read_csv(StringIO(content))
@@ -47,9 +41,8 @@ def prepare_chunks(df):
     ids = []
 
     for idx, row in df.iterrows():
-        # Use movie_to_text here to create the text chunk:
-        text_chunk = movie_to_text(row)  # <-- This is your chunk content
-        chunks.append(text_chunk)  # Add chunk to list
+        text_chunk = movie_to_text(row)
+        chunks.append(text_chunk)
 
 
         metadatas.append({
@@ -97,7 +90,7 @@ def store_in_chromadb(chunks, embeddings, metadatas, ids, db_path, collection_na
     
     print(f"Adding {len(chunks)} items to the collection...")
     # ChromaDB expects documents, embeddings, metadatas, and ids
-    # Ensure embeddings are lists of floats, not numpy arrays if an issue arises
+    # Ensure embeddings are lists of floats, not numpy arrays 
     embeddings_list = [emb.tolist() for emb in embeddings]
 
     collection.add(
