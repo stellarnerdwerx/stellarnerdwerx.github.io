@@ -392,54 +392,69 @@ details summary {
         padding: 15px;
     }
 }
-/* Chatbot Panel Styles */
+/* Chatbot Panel 
+/* === Desktop default styling === */
 #chatbot-panel {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 350px;
+  height: 100%;
+  background-color: #f9f9f9;
+  border-left: 2px solid #ccc;
+  box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  z-index: 999;
+  font-family: 'Courier Prime', monospace;
+}
+
+#chat-box {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px;
+}
+
+.chat-input-wrapper {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #ccc;
+}
+
+#user-input {
+  flex: 1;
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.chat-input-wrapper button {
+  margin-left: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  border: none;
+  background-color: #007BFF;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.chat-input-wrapper button:hover {
+  background-color: #0056b3;
+}
+
+/* === Mobile view (responsive) === */
+@media screen and (max-width: 768px) {
+  #chatbot-panel {
     position: fixed;
-    top: 0;
+    bottom: 0;
     right: 0;
-    height: 100vh;
-    width: 30px;
-    background: #fff;
-    border-left: 1px solid #ccc;
-    box-shadow: -2px 0 5px rgba(0,0,0,0.1);
-    display: flex;
-    flex-direction: column;
-    padding: 1rem;
-    z-index: 9999;
-    font-family: Arial, sans-serif;
+    width: 100%;
+    height: 50%;
+    border-left: none;
+    border-top: 2px solid #ccc;
   }
-  
-  #chatbot-panel h3 {
-    margin-top: 0;
-    font-weight: bold;
-    font-size: 1.2rem;
-  }
-  
-  #chat-box {
-    flex-grow: 1;
-    overflow-y: auto;
-    border: 1px solid #ccc;
-    padding: 0.5rem;
-    margin-bottom: 0.5rem;
-    background: #f9f9f9;
-    font-size: 0.9rem;
-  }
-  
-  #user-input {
-    padding: 0.5rem;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-    margin-bottom: 0.5rem;
-  }
-  
-  #chat-send-btn {
-    padding: 0.5rem;
-    font-size: 1rem;
-    cursor: pointer;
-    background-color: #4a90e2;
-    border: none;
-    color: white;
-    border-radius: 3px;
-  }
+}
+
   
