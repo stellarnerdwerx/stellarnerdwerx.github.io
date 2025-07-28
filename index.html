@@ -625,6 +625,19 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 </script>
+<script>
+  function toggleChatbot() {
+    const body = document.getElementById("chatbot-body");
+    body.style.display = body.style.display === "none" ? "block" : "none";
+  }
+
+  // Optional: collapse on mobile by default
+  document.addEventListener("DOMContentLoaded", () => {
+    if (window.innerWidth <= 768) {
+      document.getElementById("chatbot-body").style.display = "none";
+    }
+  });
+</script>
 
 
 
