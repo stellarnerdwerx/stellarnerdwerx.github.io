@@ -458,3 +458,18 @@ details summary {
   color: white;
   cursor: pointer;
 }
+.message {
+  font-family: sans-serif;
+  font-size: 14px;
+  margin: 8px;
+  padding: 10px;
+  border-radius: 8px;
+  max-width: 80%;
+}
+
+/* User message */
+.user-message {
+  background-color: #dcf8c6;
+  align-self: flex-end;
+  color: #000;
+}
