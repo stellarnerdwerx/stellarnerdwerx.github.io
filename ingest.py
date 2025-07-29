@@ -125,3 +125,65 @@ if __name__ == "__main__":
             print("No chunks were prepared. Check your CSV format.")
     else:
         print("Failed to load data. Check your file path and format.")
+
+
+
+import os
+import json
+import openai
+import pandas as pd
+from dotenv import load_dotenv
+from tqdm import tqdm
+
+# Load API key
+load_dotenv()
+openai.api_key = os.getenv("OPENAI_API_KEY")
+
+# === CONFIG ===
+CSV_PATH = "media_inventory.csv"         # Your spreadsheet
+OUTPUT_JSON = "media_embeddings.json"
+MODEL = "text-embedding-3-small"
+BATCH_SIZE = 100
+
+# === LOAD DATA ===
+df = pd.read_csv(CSV_PATH)
+
+# Choose columns to use as text context for embedding
+TEXT_COLUMNS = ["title", "format", "genre", "platform", "year", "notes"]
+
+# Create a full text blob per row
+def combine_row(row):
+    fields = [f"{col}: {str(row[col])}" for col in TEXT_COLUMNS if pd.notnull(row[col])]
+    return " | ".join(fields)
+
+df["combined_text"] = df.apply(combine_row, axis=1)
+texts = df["combined_text"].tolist()
+
+# === GENERATE EMBEDDINGS ===
+all_embeddings = []
+
+print(f"Generating embeddings for {len(texts)} items...")
+
+for i in tqdm(range(0, len(texts), BATCH_SIZE)):
+    batch_texts = texts[i:i + BATCH_SIZE]
+    try:
+        response = openai.Embedding.create(
+            model=MODEL,
+            input=batch_texts
+        )
+        for j, result in enumerate(response["data"]):
+            index = i + j
+            all_embeddings.append({
+                "original_row": df.iloc[index].to_dict(),  # Save all row info
+                "text": texts[index],
+                "embedding": result["embedding"]
+            })
+    except Exception as e:
+        print(f"⚠️ Error processing batch {i}-{i+BATCH_SIZE}: {e}")
+
+# === SAVE OUTPUT ===
+with open(OUTPUT_JSON, "w") as f:
+    json.dump(all_embeddings, f)
+
+print(f"✅ Done! Saved {len(all_embeddings)} media embeddings to {OUTPUT_JSON}")
+
