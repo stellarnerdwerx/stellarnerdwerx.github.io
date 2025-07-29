@@ -626,9 +626,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </script>
 <script>
-  function toggleChatbot() {
-    const body = document.getElementById("chatbot-body");
-    body.style.display = body.style.display === "none" ? "block" : "none";
+  ffunction toggleChatbot() {
+    const panel = document.getElementById('chatbot-panel');
+    panel.classList.toggle('open');
   }
 
   // Optional: collapse on mobile by default

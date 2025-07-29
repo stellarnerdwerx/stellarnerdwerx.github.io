@@ -518,6 +518,31 @@ details summary {
   display: flex;
   flex-direction: column;
 }
+/* Chatbot Toggle Button */
+#chatbot-toggle {
+  position: fixed;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  background-color: #007BFF;
+  color: white;
+  border: none;
+  padding: 10px;
+  border-radius: 8px 0 0 8px;
+  cursor: pointer;
+  z-index: 1001;
+  font-weight: bold;
+}
+
+/* Toggle Behavior */
+#chatbot-panel {
+  right: -300px; /* Hide off screen by default */
+  transition: right 0.3s ease-in-out;
+}
+
+#chatbot-panel.open {
+  right: 0; /* Slide in */
+}
 
 
 
