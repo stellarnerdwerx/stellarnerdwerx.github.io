@@ -392,170 +392,84 @@ details summary {
     padding: 15px;
   }
 
-  /* Mobile Chatbot Panel */
-  #chatbot-panel {
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    width: 100%;
-    height: auto;
-    background-color: #f9f9f9;
-    border-top: 2px solid #ccc;
-    border-left: none;
-    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-    z-index: 999;
-    font-family: 'Courier Prime', monospace;
-  }
 
-  #chatbot-header {
-    background-color: #444;
-    color: white;
-    padding: 10px;
-    font-weight: bold;
-    text-align: center;
-    cursor: pointer;
+  #chatbot-panel {
+    bottom: 10px;
+    right: 10px;
+    width: 90vw;
+    max-height: 70vh;
   }
 
   #chatbot-body {
-    display: none; /* JS toggles this */
+    max-height: 50vh;
   }
 
   #chat-box {
-    max-height: 200px;
-    padding: 12px;
-    overflow-y: auto;
+    max-height: 35vh;
   }
 
-  .chat-input-wrapper {
-    flex-direction: row;
-    padding: 10px;
-    border-top: 1px solid #ccc;
-  }
-
-  #user-input {
-    flex: 1;
-    font-size: 14px;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-  }
-
-  .chat-input-wrapper button {
-    margin-left: 8px;
-    padding: 8px 12px;
-    font-size: 14px;
-    border: none;
-    background-color: #007BFF;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-
-  .chat-input-wrapper button:hover {
-    background-color: #0056b3;
-  }
 }
 
-
-/* Chatbot Panel 
-/* === Desktop default styling === */
+/* Base Chatbot Panel Styles */
 #chatbot-panel {
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 320px;
-  background: white;
+  width: 300px;
+  max-height: 500px;
   border: 1px solid #ccc;
-  border-radius: 12px;
+  border-radius: 10px;
+  background-color: #fff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  font-family: Arial, sans-serif;
-  overflow: hidden;
+  font-family: sans-serif;
+  display: flex;
+  flex-direction: column;
   z-index: 9999;
 }
 
 #chatbot-header {
-  background-color: #333;
-  color: white;
+  background-color: #222;
+  color: #fff;
   padding: 10px;
-  font-weight: bold;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
   cursor: pointer;
-  border-bottom: 1px solid #ccc;
+  font-weight: bold;
+  text-align: center;
 }
 
 #chatbot-body {
+  display: none;
+  flex-grow: 1;
   padding: 10px;
-  display: block;
+  overflow-y: auto;
+  max-height: 400px;
 }
 
 #chat-box {
-  height: 250px; /* Set max height */
   overflow-y: auto;
-  border: 1px solid #ddd;
-  padding: 8px;
+  flex-grow: 1;
+  max-height: 300px;
   margin-bottom: 10px;
-  background-color: #f9f9f9;
-  font-size: 14px;
 }
 
 .chat-input-wrapper {
   display: flex;
-  gap: 8px;
+  gap: 5px;
 }
 
-.chat-input-wrapper input {
+#user-input {
   flex: 1;
-  padding: 6px;
+  padding: 8px;
   font-size: 14px;
 }
 
 .chat-input-wrapper button {
-  padding: 6px 12px;
+  padding: 8px 12px;
   font-size: 14px;
-  background-color: #4CAF50;
-  color: white;
+  background-color: #333;
+  color: #fff;
   border: none;
+  cursor: pointer;
   border-radius: 4px;
-  cursor: pointer;
 }
-
-/* Chatbot Toggle Button */
-#chatbot-toggle {
-  position: fixed;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  background-color: #007BFF;
-  color: white;
-  border: none;
-  padding: 10px;
-  border-radius: 8px 0 0 8px;
-  cursor: pointer;
-  z-index: 1001;
-  font-weight: bold;
-}
-
-/* Toggle Behavior */
-#chatbot-panel {
-  right: -300px; /* Hide off screen by default */
-  transition: right 0.3s ease-in-out;
-}
-
-#chatbot-panel.open {
-  right: 0; /* Slide in */
-}
-/* Hidden by default */
-#chatbot-panel {
-  right: -300px;
-  transition: right 0.3s ease-in-out;
-}
-
-/* When open */
-#chatbot-panel.open {
-  right: 0;
-}
-
-
-
-
-
-  
