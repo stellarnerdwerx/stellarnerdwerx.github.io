@@ -509,9 +509,9 @@ details summary {
   background-color: #0056b3;
 }
 
-#chatbot-header {
+/* #chatbot-header {
   display: none; /* only shows on mobile */
-}
+} */
 
 #chatbot-body {
   flex: 1;
@@ -542,6 +542,16 @@ details summary {
 
 #chatbot-panel.open {
   right: 0; /* Slide in */
+}
+/* Hidden by default */
+#chatbot-panel {
+  right: -300px;
+  transition: right 0.3s ease-in-out;
+}
+
+/* When open */
+#chatbot-panel.open {
+  right: 0;
 }
 
 
