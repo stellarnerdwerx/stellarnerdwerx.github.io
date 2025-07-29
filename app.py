@@ -1,11 +1,14 @@
 from flask import Flask, request, jsonify
 from retriever import get_answer
+import os
+from dotenv import load_dotenv
+
+project_folder = os.path.dirname(os.path.abspath(__file__))
+load_dotenv(os.path.join(project_folder, '.env'))
+
+OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
 app = Flask(__name__)
-
-@app.route("/")
-def index():
-    return send_from_directory('.', 'index.html')
 
 @app.route("/chat", methods=["POST"])
 def chat():
@@ -17,5 +20,4 @@ def chat():
     answer = get_answer(user_input)
     return jsonify({"response": answer})
 
-if __name__ == "__main__":
-    app.run(debug=True)
+# No app.run() needed for deployment on PythonAnywhere

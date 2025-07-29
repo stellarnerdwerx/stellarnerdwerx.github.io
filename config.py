@@ -1,7 +1,7 @@
 # config
 PATH = '/Users/lena/Documents/DATABASES/'
 DATA_PATH = PATH+'movies_with_info_20250601.csv'
-CHROMA_DB_PATH = PATH+'chroma_db'
+CHROMA_DB_PATH = "/home/sestock/chroma_db"
 COLLECTION_NAME = "movieinfo_collection"
 
 EMBEDDING_MODEL = 'all-MiniLM-L6-v2'

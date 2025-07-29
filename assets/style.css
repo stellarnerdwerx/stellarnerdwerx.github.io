@@ -436,7 +436,6 @@ details summary {
 }
 
 #chatbot-body {
-  /* display: none; Starts hidden */
   padding: 10px;
   max-height: 300px;
   overflow-y: auto;

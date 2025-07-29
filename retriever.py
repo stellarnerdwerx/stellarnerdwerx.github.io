@@ -1,4 +1,6 @@
-from sentence_transformers import SentenceTransformer
+# from sentence_transformers import SentenceTransformer
+import openai
+
 import chromadb
 import os
 import openai
@@ -12,10 +14,19 @@ load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
 client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
-# load embedding model
-def load_model(model_name):
-    print(f"Loading embedding model: {model_name}")
-    return SentenceTransformer(model_name)
+# # load embedding model
+# def load_model(model_name):
+#     print(f"Loading embedding model: {model_name}")
+#     return SentenceTransformer(model_name)
+
+# use openai instead of sentencetransformer
+def get_openai_embedding(text):
+    response = openai.Embedding.create(
+        model="text-embedding-3-small",  # or use "text-embedding-3-large" or whichever OpenAI embedding model you want
+        input=text
+    )
+    return response['data'][0]['embedding']
+
 
 # load ChromaDB
 def load_collection(db_path, collection_name):
@@ -25,12 +36,14 @@ def load_collection(db_path, collection_name):
     return collection
 
 # global load on import
-model = load_model(EMBEDDING_MODEL)
+# model = load_model(EMBEDDING_MODEL)
 collection = load_collection(CHROMA_DB_PATH, COLLECTION_NAME)
 
 def get_answer(question):
     """Runs semantic search and uses OpenAI to answer based on context."""
-    results = search_movies(question, model, collection)
+    # results = search_movies(question, model, collection)
+    results = search_movies(question, collection) # no longer passing model
+
 
     if not results["documents"][0]:
         return "I couldn't find anything related to that question."
@@ -73,9 +86,23 @@ Answer:"""
         return f"Error generating answer: {str(e)}"
 
 # query
-def search_movies(query, model, collection, top_k=TOP_K):
-    print(f"Encoding query: {query}")
-    query_embedding = model.encode([query])[0]  # single query
+# def search_movies(query, model, collection, top_k=TOP_K):
+#     print(f"Encoding query: {query}")
+#     query_embedding = model.encode([query])[0]  # single query
+
+#     print(f"Searching top {top_k} results...")
+#     results = collection.query(
+#         query_embeddings=[query_embedding],
+#         n_results=top_k,
+#         include=["documents", "metadatas", "distances"]
+#     )
+
+#     return results
+
+#query using openai
+def search_movies(query, collection, top_k=TOP_K):
+    print(f"Embedding query with OpenAI")
+    query_embedding = get_openai_embedding(query)
 
     print(f"Searching top {top_k} results...")
     results = collection.query(
@@ -85,6 +112,7 @@ def search_movies(query, model, collection, top_k=TOP_K):
     )
 
     return results
+
 
 # display results
 def display_results(results):
