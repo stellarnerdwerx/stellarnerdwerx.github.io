@@ -416,60 +416,55 @@ details summary {
   bottom: 20px;
   right: 20px;
   width: 300px;
-  max-height: 500px;
-  border: 1px solid #ccc;
-  border-radius: 10px;
+  max-height: 400px;
   background-color: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.1);
   font-family: sans-serif;
-  display: flex;
-  flex-direction: column;
   z-index: 9999;
 }
 
 #chatbot-header {
-  background-color: #222;
+  background-color: #444;
   color: #fff;
   padding: 10px;
-  border-top-left-radius: 10px;
-  border-top-right-radius: 10px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
   cursor: pointer;
   font-weight: bold;
-  text-align: center;
 }
 
 #chatbot-body {
-  display: none;
-  flex-grow: 1;
+  display: none; /* Starts hidden */
   padding: 10px;
+  max-height: 300px;
   overflow-y: auto;
-  max-height: 400px;
 }
 
 #chat-box {
+  max-height: 200px;
   overflow-y: auto;
-  flex-grow: 1;
-  max-height: 300px;
   margin-bottom: 10px;
 }
 
 .chat-input-wrapper {
   display: flex;
-  gap: 5px;
+  gap: 8px;
 }
 
-#user-input {
+.chat-input-wrapper input {
   flex: 1;
   padding: 8px;
-  font-size: 14px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
 }
 
 .chat-input-wrapper button {
   padding: 8px 12px;
-  font-size: 14px;
-  background-color: #333;
-  color: #fff;
+  border-radius: 8px;
   border: none;
+  background-color: #444;
+  color: white;
   cursor: pointer;
-  border-radius: 4px;
 }
