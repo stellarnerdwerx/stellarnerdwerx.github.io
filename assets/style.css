@@ -461,63 +461,63 @@ details summary {
 /* === Desktop default styling === */
 #chatbot-panel {
   position: fixed;
-  top: 0;
-  right: 0;
-  width: 300px;
-  height: 100%;
-  background-color: #f9f9f9;
-  border-left: 2px solid #ccc;
-  box-shadow: -2px 0 5px rgba(0,0,0,0.1);
-  display: flex;
-  flex-direction: column;
-  z-index: 999;
-  font-family: 'Courier Prime', monospace;
+  bottom: 20px;
+  right: 20px;
+  width: 320px;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  font-family: Arial, sans-serif;
+  overflow: hidden;
+  z-index: 9999;
+}
+
+#chatbot-header {
+  background-color: #333;
+  color: white;
+  padding: 10px;
+  font-weight: bold;
+  cursor: pointer;
+  border-bottom: 1px solid #ccc;
+}
+
+#chatbot-body {
+  padding: 10px;
+  display: block;
 }
 
 #chat-box {
-  flex: 1;
+  height: 250px; /* Set max height */
   overflow-y: auto;
-  padding: 12px;
+  border: 1px solid #ddd;
+  padding: 8px;
+  margin-bottom: 10px;
+  background-color: #f9f9f9;
+  font-size: 14px;
 }
 
 .chat-input-wrapper {
   display: flex;
-  padding: 10px;
-  border-top: 1px solid #ccc;
+  gap: 8px;
 }
 
-#user-input {
+.chat-input-wrapper input {
   flex: 1;
-  padding: 8px;
+  padding: 6px;
   font-size: 14px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
 }
 
 .chat-input-wrapper button {
-  margin-left: 8px;
-  padding: 8px 12px;
+  padding: 6px 12px;
   font-size: 14px;
-  border: none;
-  background-color: #007BFF;
+  background-color: #4CAF50;
   color: white;
+  border: none;
   border-radius: 4px;
   cursor: pointer;
 }
 
-.chat-input-wrapper button:hover {
-  background-color: #0056b3;
-}
-
-/* #chatbot-header {
-  display: none; /* only shows on mobile */
-} */
-
-#chatbot-body {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
 /* Chatbot Toggle Button */
 #chatbot-toggle {
   position: fixed;
