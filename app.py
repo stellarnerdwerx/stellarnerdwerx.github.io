@@ -1,4 +1,6 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
+
 from retriever import get_answer
 import os
 from dotenv import load_dotenv
@@ -9,6 +11,7 @@ load_dotenv(os.path.join(project_folder, '.env'))
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
 app = Flask(__name__)
+CORS(app)  # Enables CORS so your GitHub Pages frontend can call this API
 
 @app.route("/chat", methods=["POST"])
 def chat():
