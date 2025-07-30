@@ -414,6 +414,9 @@ details summary {
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
   font-family: sans-serif;
   z-index: 9999;
+  overflow-y: auto;
+  overflow: hidden;
+
 }
 
 #chatbot-header {
@@ -428,11 +431,10 @@ details summary {
 
 #chatbot-body {
   padding: 10px;
-  /* max-height: 300px; */
-  overflow-y: auto;
+  max-height: 300px;
+  /* overflow-y: auto; */
   display: flex;
   flex-direction: column;
-  height: 100%; /* full height of the chatbot body */
 }
 
 #chat-box {
@@ -445,13 +447,14 @@ details summary {
 }
 
 .chat-input-wrapper {
-  /* display: flex;
-  gap: 8px; */
+  display: flex;
+  /* gap: 8px; */
 
-  flex-shrink: 0;     /* prevent shrinking */
-  padding: 10px;
+  /* flex-shrink: 0;     prevent shrinking */
+  padding: 0.75em;
   border-top: 1px solid #ccc;
   background: white;
+  align-items: center;
 }
 
 .chat-input-wrapper input {
