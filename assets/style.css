@@ -428,19 +428,30 @@ details summary {
 
 #chatbot-body {
   padding: 10px;
-  max-height: 300px;
+  /* max-height: 300px; */
   overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* full height of the chatbot body */
 }
 
 #chat-box {
-  max-height: 200px;
-  overflow-y: auto;
+  flex-grow: 1;       /* take all remaining space */
+  overflow-y: auto;   /* scroll messages if overflow */
+  padding: 10px;
+  box-sizing: border-box;
   margin-bottom: 10px;
+  max-height: none; /* remove any restrictive max-height */
 }
 
 .chat-input-wrapper {
-  display: flex;
-  gap: 8px;
+  /* display: flex;
+  gap: 8px; */
+
+  flex-shrink: 0;     /* prevent shrinking */
+  padding: 10px;
+  border-top: 1px solid #ccc;
+  background: white;
 }
 
 .chat-input-wrapper input {
