@@ -477,6 +477,11 @@ details summary {
   border-radius: 8px;
   max-width: 80%;
 }
+.message.bot-message {
+  color: #222;      /* dark color so it’s visible */
+  font-style: italic;
+}
+
 
 /* User message */
 .user-message {

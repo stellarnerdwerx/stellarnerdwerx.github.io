@@ -635,7 +635,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       const data = await response.json();
-      botMessage.textContent = data.answer;
+      botMessage.textContent = data.response;
       chatBox.scrollTop = chatBox.scrollHeight;
     } catch (error) {
       botMessage.textContent = "Oops! Something went wrong.";
