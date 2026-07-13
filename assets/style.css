@@ -44,6 +44,14 @@ header h1 {
     height: 38vw;
     min-height: 110px;
   }
+
+  nav ul {
+    flex-wrap: wrap;
+  }
+
+  nav ul li {
+    margin: 0.25em 0.6em;
+  }
 }
 
 
