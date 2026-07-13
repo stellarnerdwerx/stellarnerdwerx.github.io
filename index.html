@@ -23,7 +23,7 @@
     <!-- End Google Tag Manager (noscript) -->
     <header>
         <div id="banner">
-            <img src="assets/banner3.png" alt="Banner showcasing movies, retro video games, and board games" />
+            <img src="assets/banner3.jpg" alt="Banner showcasing movies, retro video games, and board games" />
         </div>
         
         <!-- <h1>Welcome to StellarSearch!</h1> -->
@@ -38,6 +38,7 @@
             <li><a href="#movies" onclick="toggleSection('movies')">Movies</a></li>
             <li><a href="#games" onclick="toggleSection('games')">Video Games</a></li>
             <li><a href="#boardgames" onclick="toggleSection('boardgames')">Board Games</a></li>
+            <li><a href="#randomizer" onclick="toggleSection('randomizer')">🎲 Pick For Me</a></li>
         </ul>
     </nav>
     <script>
@@ -119,6 +120,62 @@ function escHtml(str) {
   }[c]));
 }
 
+// Builds a flip-card <li> for a single movie row. Shared by search results and the randomizer.
+function buildMovieCard(columns, movie) {
+  const listItem = document.createElement('li');
+  listItem.className = 'movie-item flip-card';
+
+  const movieData = {};
+  columns.forEach((col, index) => {
+    movieData[col.toLowerCase()] = movie[index];
+  });
+
+  const formats = columns
+    .filter(col => (col === 'dvd' || col === 'bluray' || col === 'three_d' || col === 'four_k') && Number(movieData[col.toLowerCase()]) === 1)
+    .map(col => col);
+
+  const formatsfinal = formats.map(format =>
+    format
+      .replace('three_d', '3D')
+      .replace('bluray', 'Blu-Ray')
+      .replace('dvd', 'DVD')
+      .replace('four_k', '4K')
+  );
+
+  const title = movieData.title || '';
+  const posterFace = movieData.poster_url
+    ? `<img src="${escHtml(movieData.poster_url)}" alt="${escHtml(title)} poster" class="card-poster" loading="lazy" onerror="this.outerHTML='&lt;div class=&quot;card-poster-placeholder&quot;&gt;🎬&lt;/div&gt;'">`
+    : `<div class="card-poster-placeholder">🎬</div>`;
+
+  listItem.innerHTML = `
+    <div class="flip-card-inner">
+      <div class="flip-card-front">
+        ${posterFace}
+        <div class="card-caption">
+          <div class="card-title">${escHtml(title)}</div>
+          <div class="card-meta">${movieData.year || ''}${movieData.rating ? ' · ★ ' + movieData.rating : ''}</div>
+        </div>
+        <span class="flip-hint">&#8635;</span>
+      </div>
+      <div class="flip-card-back">
+        <div class="card-title">${escHtml(title)}</div>
+        <div class="card-meta">${movieData.year || ''}${movieData.rating ? ' · Rating ' + movieData.rating : ''}</div>
+        <div class="pill-list">${formatsfinal.length > 0 ? formatsfinal.map(f => `<span class="pill">${f}</span>`).join('') : '<span class="pill">No formats listed</span>'}</div>
+        <div class="card-genres">${escHtml(movieData.genres || '')}</div>
+        <div class="card-plot">${escHtml(movieData.plot || 'No synopsis available.')}</div>
+        ${movieData.director ? `<div class="card-detail-line"><strong>Director:</strong> ${escHtml(movieData.director.replace(/\|/g, ', '))}</div>` : ''}
+        ${movieData.cast ? `<div class="card-detail-line"><strong>Cast:</strong> ${escHtml(movieData.cast.replace(/\|/g, ', '))}</div>` : ''}
+      </div>
+    </div>
+  `;
+
+  listItem.querySelector('.flip-card-inner').addEventListener('click', () => {
+    listItem.classList.toggle('flipped');
+  });
+
+  return listItem;
+}
+
 // Load the SQLite database
 async function loadDatabase() {
   try {
@@ -185,62 +242,9 @@ function searchMovies() {
 
     if (results && results.length > 0 && results[0].values.length > 0) {
       const columns = results[0].columns;
-      
+
       results[0].values.forEach(movie => {
-        const listItem = document.createElement('li');
-        listItem.className = 'movie-item flip-card';
-
-        // Create an object mapping column names to values
-        const movieData = {};
-        columns.forEach((col, index) => {
-          movieData[col.toLowerCase()] = movie[index];
-        });
-
-        // Build the display HTML using the mapped data
-        const formats = columns
-          .filter(col => (col === 'dvd' || col === 'bluray' || col === 'three_d' || col === 'four_k') && Number(movieData[col.toLowerCase()]) === 1)
-          .map(col => col);
-
-        const formatsfinal = formats.map(format =>
-          format
-            .replace('three_d', '3D')
-            .replace('bluray', 'Blu-Ray')
-            .replace('dvd', 'DVD')
-            .replace('four_k', '4K')
-        );
-
-        const title = movieData.title || '';
-        const posterFace = movieData.poster_url
-          ? `<img src="${escHtml(movieData.poster_url)}" alt="${escHtml(title)} poster" class="card-poster" loading="lazy" onerror="this.outerHTML='&lt;div class=&quot;card-poster-placeholder&quot;&gt;🎬&lt;/div&gt;'">`
-          : `<div class="card-poster-placeholder">🎬</div>`;
-
-        listItem.innerHTML = `
-          <div class="flip-card-inner">
-            <div class="flip-card-front">
-              ${posterFace}
-              <div class="card-caption">
-                <div class="card-title">${escHtml(title)}</div>
-                <div class="card-meta">${movieData.year || ''}${movieData.rating ? ' · ★ ' + movieData.rating : ''}</div>
-              </div>
-              <span class="flip-hint">&#8635;</span>
-            </div>
-            <div class="flip-card-back">
-              <div class="card-title">${escHtml(title)}</div>
-              <div class="card-meta">${movieData.year || ''}${movieData.rating ? ' · Rating ' + movieData.rating : ''}</div>
-              <div class="pill-list">${formatsfinal.length > 0 ? formatsfinal.map(f => `<span class="pill">${f}</span>`).join('') : '<span class="pill">No formats listed</span>'}</div>
-              <div class="card-genres">${escHtml(movieData.genres || '')}</div>
-              <div class="card-plot">${escHtml(movieData.plot || 'No synopsis available.')}</div>
-              ${movieData.director ? `<div class="card-detail-line"><strong>Director:</strong> ${escHtml(movieData.director.replace(/\|/g, ', '))}</div>` : ''}
-              ${movieData.cast ? `<div class="card-detail-line"><strong>Cast:</strong> ${escHtml(movieData.cast.replace(/\|/g, ', '))}</div>` : ''}
-            </div>
-          </div>
-        `;
-
-        listItem.querySelector('.flip-card-inner').addEventListener('click', () => {
-          listItem.classList.toggle('flipped');
-        });
-
-        movieList.appendChild(listItem);
+        movieList.appendChild(buildMovieCard(columns, movie));
       });
     } else if (results[0].values.length === 0) {
       movieList.innerHTML = '<li class="no-results">No movies found.</li>';
@@ -593,6 +597,114 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     </script>
 
+    <!-- Randomizer Section -->
+    <section id="randomizer" style="display:none">
+      <h2>🎲 Pick For Me</h2>
+      <p class="randomizer-intro">Can't decide what to watch? Set a few knobs if you want, or leave them all blank and let fate handle it.</p>
+      <div class="search">
+          <select id="rand-genre">
+              <option value="">Any Genre</option>
+              <option value="action">Action</option>
+              <option value="animation">Animation</option>
+              <option value="comedy">Comedy</option>
+              <option value="drama">Drama</option>
+              <option value="family">Family</option>
+              <option value="holiday">Holiday</option>
+              <option value="horror">Horror</option>
+              <option value="mystery">Mystery</option>
+              <option value="romance">Romance</option>
+              <option value="sci-fi">Sci-Fi</option>
+              <option value="thriller">Thriller</option>
+          </select>
+
+          <select id="rand-decade">
+              <option value="">Any Era</option>
+              <option value="0-1979">Before 1980</option>
+              <option value="1980-1989">1980s</option>
+              <option value="1990-1999">1990s</option>
+              <option value="2000-2009">2000s</option>
+              <option value="2010-2019">2010s</option>
+              <option value="2020-2099">2020s+</option>
+          </select>
+
+          <input type="text" id="rand-director" placeholder="Director (optional)">
+          <input type="text" id="rand-actor" placeholder="Actor (optional)">
+
+          <button onclick="pickRandomMovie()">🎲 Pick For Me!</button>
+      </div>
+
+      <div id="rand-result-count"></div>
+      <ul id="rand-result" class="rand-result-grid"></ul>
+    </section>
+
+    <script>
+      function pickRandomMovie() {
+        try {
+          if (!db) {
+            throw new Error('Database not loaded yet');
+          }
+
+          const genre = document.getElementById('rand-genre').value;
+          const decade = document.getElementById('rand-decade').value;
+          const director = document.getElementById('rand-director').value.trim().toLowerCase();
+          const actor = document.getElementById('rand-actor').value.trim().toLowerCase();
+
+          let conditions = [];
+          if (genre) {
+            conditions.push(`LOWER(genres) LIKE '%${genre.toLowerCase()}%'`);
+          }
+          if (decade) {
+            const [minYear, maxYear] = decade.split('-');
+            conditions.push(`year BETWEEN ${parseInt(minYear, 10)} AND ${parseInt(maxYear, 10)}`);
+          }
+          if (director) {
+            conditions.push(`LOWER(director) LIKE '%${director.replace(/'/g, "''")}%'`);
+          }
+          if (actor) {
+            conditions.push(`LOWER("cast") LIKE '%${actor.replace(/'/g, "''")}%'`);
+          }
+
+          let query = "SELECT * FROM movies WHERE 1=1";
+          if (conditions.length > 0) {
+            query += ` AND ${conditions.join(' AND ')}`;
+          }
+
+          const countResult = db.exec(`SELECT COUNT(*) FROM (${query})`);
+          const matchCount = countResult[0].values[0][0];
+
+          const resultCountEl = document.getElementById('rand-result-count');
+          const resultList = document.getElementById('rand-result');
+          resultList.innerHTML = '';
+
+          if (matchCount === 0) {
+            resultCountEl.innerHTML = `No movies match those filters — try loosening them up.`;
+            return;
+          }
+
+          resultCountEl.innerHTML = `Picked from ${matchCount} matching movie${matchCount !== 1 ? 's' : ''}:`;
+
+          const pickResult = db.exec(`${query} ORDER BY RANDOM() LIMIT 1`);
+          const columns = pickResult[0].columns;
+          const movie = pickResult[0].values[0];
+
+          const card = buildMovieCard(columns, movie);
+          card.classList.add('rand-card');
+          resultList.appendChild(card);
+        } catch (error) {
+          console.error('Randomizer error:', error);
+          document.getElementById('rand-result-count').innerHTML = 'Something went wrong picking a movie.';
+        }
+      }
+
+      document.addEventListener('DOMContentLoaded', () => {
+        document.getElementById('rand-director').addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') pickRandomMovie();
+        });
+        document.getElementById('rand-actor').addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') pickRandomMovie();
+        });
+      });
+    </script>
 
     <!-- Chatbot Panel -->
     <div id="chatbot-panel">
@@ -629,6 +741,12 @@ document.addEventListener('DOMContentLoaded', () => {
         sendMessage(); // call your existing function
       }
     });
+
+    const chatBox = document.getElementById("chat-box");
+    const greeting = document.createElement("div");
+    greeting.className = "message bot-message";
+    greeting.textContent = "Greetings! I'm The Curator, keeper of this collection's movies, games, and hidden gems. What are you in the mood for tonight?";
+    chatBox.appendChild(greeting);
   });
 
   async function sendMessage() {
@@ -674,7 +792,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function resetConversation() {
     conversationHistory = [];
-    document.getElementById("chat-box").innerHTML = "";
+    const chatBox = document.getElementById("chat-box");
+    chatBox.innerHTML = "";
+    const greeting = document.createElement("div");
+    greeting.className = "message bot-message";
+    greeting.textContent = "Fresh start! What are you in the mood for tonight?";
+    chatBox.appendChild(greeting);
   }
 
   // Optional: show chatbot open by default
