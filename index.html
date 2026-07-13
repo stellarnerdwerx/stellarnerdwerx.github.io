@@ -227,11 +227,11 @@ function searchMovies() {
             <div class="flip-card-back">
               <div class="card-title">${escHtml(title)}</div>
               <div class="card-meta">${movieData.year || ''}${movieData.rating ? ' · Rating ' + movieData.rating : ''}</div>
+              <div class="pill-list">${formatsfinal.length > 0 ? formatsfinal.map(f => `<span class="pill">${f}</span>`).join('') : '<span class="pill">No formats listed</span>'}</div>
               <div class="card-genres">${escHtml(movieData.genres || '')}</div>
               <div class="card-plot">${escHtml(movieData.plot || 'No synopsis available.')}</div>
               ${movieData.director ? `<div class="card-detail-line"><strong>Director:</strong> ${escHtml(movieData.director.replace(/\|/g, ', '))}</div>` : ''}
               ${movieData.cast ? `<div class="card-detail-line"><strong>Cast:</strong> ${escHtml(movieData.cast.replace(/\|/g, ', '))}</div>` : ''}
-              <div class="pill-list">${formatsfinal.length > 0 ? formatsfinal.map(f => `<span class="pill">${f}</span>`).join('') : '<span class="pill">No formats listed</span>'}</div>
             </div>
           </div>
         `;
