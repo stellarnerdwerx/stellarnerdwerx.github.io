@@ -113,6 +113,12 @@ const sqlConfig = {
 
 let db;
 
+function escHtml(str) {
+  return String(str ?? '').replace(/[&<>"']/g, c => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[c]));
+}
+
 // Load the SQLite database
 async function loadDatabase() {
   try {
@@ -182,8 +188,8 @@ function searchMovies() {
       
       results[0].values.forEach(movie => {
         const listItem = document.createElement('li');
-        listItem.className = 'movie-item';
-        
+        listItem.className = 'movie-item flip-card';
+
         // Create an object mapping column names to values
         const movieData = {};
         columns.forEach((col, index) => {
@@ -203,31 +209,36 @@ function searchMovies() {
             .replace('four_k', '4K')
         );
 
-        listItem.innerHTML = `
-          <details class="movie-tile">
-            <summary>
-              <div class="summary-content">
-                <div>
-                  <div class="movie-title">${movieData.title || ''}</div>
-                  <div class="movie-meta">
-                    <span>${movieData.year || ''} | Rating: ${movieData.rating || 'N/A'}</span>
-                  </div>
-                </div>
-                <span class="custom-arrow"></span>
-              </div>
-            </summary>
+        const title = movieData.title || '';
+        const posterFace = movieData.poster_url
+          ? `<img src="${escHtml(movieData.poster_url)}" alt="${escHtml(title)} poster" class="card-poster" loading="lazy" onerror="this.outerHTML='&lt;div class=&quot;card-poster-placeholder&quot;&gt;🎬&lt;/div&gt;'">`
+          : `<div class="card-poster-placeholder">🎬</div>`;
 
-            <div class="movie-content">
-              <div class="movie-genres">${movieData.genres || ''}</div>
-              <div class="movie-format-list">
-                <span><strong>Available on: </strong>${formatsfinal.length > 0 ? formatsfinal.join(', ') : 'No formats available'}</span>
-              </div><br>
-              <div class="movie-plot">${movieData.plot || ''}</div>
-              ${movieData.cast ? `<div class="movie-cast">Cast: ${movieData.cast.replace(/\|/g, ', ')}</div>` : ''}
-              ${movieData.director ? `<div class="movie-director">Director: ${movieData.director.replace(/\|/g, ', ')}</div>` : ''}
+        listItem.innerHTML = `
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              ${posterFace}
+              <div class="card-caption">
+                <div class="card-title">${escHtml(title)}</div>
+                <div class="card-meta">${movieData.year || ''}${movieData.rating ? ' · ★ ' + movieData.rating : ''}</div>
+              </div>
+              <span class="flip-hint">&#8635;</span>
             </div>
-          </details>
+            <div class="flip-card-back">
+              <div class="card-title">${escHtml(title)}</div>
+              <div class="card-meta">${movieData.year || ''}${movieData.rating ? ' · Rating ' + movieData.rating : ''}</div>
+              <div class="card-genres">${escHtml(movieData.genres || '')}</div>
+              <div class="card-plot">${escHtml(movieData.plot || 'No synopsis available.')}</div>
+              ${movieData.director ? `<div class="card-detail-line"><strong>Director:</strong> ${escHtml(movieData.director.replace(/\|/g, ', '))}</div>` : ''}
+              ${movieData.cast ? `<div class="card-detail-line"><strong>Cast:</strong> ${escHtml(movieData.cast.replace(/\|/g, ', '))}</div>` : ''}
+              <div class="pill-list">${formatsfinal.length > 0 ? formatsfinal.map(f => `<span class="pill">${f}</span>`).join('') : '<span class="pill">No formats listed</span>'}</div>
+            </div>
+          </div>
         `;
+
+        listItem.querySelector('.flip-card-inner').addEventListener('click', () => {
+          listItem.classList.toggle('flipped');
+        });
 
         movieList.appendChild(listItem);
       });
@@ -246,9 +257,6 @@ function searchMovies() {
 document.addEventListener('DOMContentLoaded', () => {
   loadDatabase();
 
-  // Add event listeners for all search inputs
-  document.querySelector('button').addEventListener('click', searchMovies);
-  
   document.getElementById('movie-search').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
       searchMovies();
@@ -349,8 +357,8 @@ function searchvgames() {
       
       results[0].values.forEach(vgame => {
         const listItem = document.createElement('li');
-        listItem.className = 'vgame-item';
-        
+        listItem.className = 'vgame-item flip-card';
+
         // Create an object mapping column names to values
         const vgameData = {};
         columns.forEach((col, index) => {
@@ -361,13 +369,32 @@ function searchvgames() {
         const consoles = columns.filter(col => col !== 'title' && Number(vgameData[col.toLowerCase()]) === 1).map(col => col);
         var consolesfinal = consoles.map(consoles => consoles.replace('_', ' ').replace('THREE ','3'));
 
-        console.log(consolesfinal)
+        const title = vgameData.title || '';
+        const pills = consolesfinal.length > 0
+          ? consolesfinal.map(c => `<span class="pill">${escHtml(c)}</span>`).join('')
+          : '<span class="pill">No consoles listed</span>';
+
         listItem.innerHTML = `
-          <div class="vgame-title">${vgameData.title || ''}</div>
-          <div class="vgame-console-list">
-            <strong>Available on: </strong>${consolesfinal.length > 0 ? consolesfinal.join(', ') : 'No consoles available'}
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              <div class="card-poster-placeholder">🎮</div>
+              <div class="card-caption">
+                <div class="card-title">${escHtml(title)}</div>
+                <div class="card-meta">${consolesfinal.length} platform${consolesfinal.length !== 1 ? 's' : ''}</div>
+              </div>
+              <span class="flip-hint">&#8635;</span>
+            </div>
+            <div class="flip-card-back">
+              <div class="card-title">${escHtml(title)}</div>
+              <div class="card-detail-line"><strong>Available on:</strong></div>
+              <div class="pill-list">${pills}</div>
+            </div>
           </div>
         `;
+
+        listItem.querySelector('.flip-card-inner').addEventListener('click', () => {
+          listItem.classList.toggle('flipped');
+        });
 
         vgameList.appendChild(listItem);
       });
@@ -384,11 +411,6 @@ function searchvgames() {
 
 // Add event listeners
 document.addEventListener('DOMContentLoaded', () => {
-  loadDatabase();
-
-  // Add event listeners for all search inputs
-  document.querySelector('button').addEventListener('click', searchvgames);
-  
   document.getElementById('vgame-search').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
       searchvgames();
@@ -510,33 +532,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
       results[0].values.forEach(bgame => {
         const listItem = document.createElement('li');
-        listItem.className = 'bgame-item';
+        listItem.className = 'bgame-item flip-card';
 
         const bgameData = {};
         columns.forEach((col, index) => {
           bgameData[col.toLowerCase()] = bgame[index];
         });
 
+        const title = bgameData["title"] || '';
+
         listItem.innerHTML = `
-          <details class="bgame-tile">
-            <summary>
-              <div class="bgame-summary-content">
-                <div>
-                  <div class="bgame-title">${bgameData["title"] || ''}</div>
-                  <div class="bgame-meta">
-                    <span>${bgameData["category"] || ''}</span>
-                  </div>
-                </div>
-                <span class="bgame-arrow"></span>
+          <div class="flip-card-inner">
+            <div class="flip-card-front">
+              <div class="card-poster-placeholder">🎲</div>
+              <div class="card-caption">
+                <div class="card-title">${escHtml(title)}</div>
+                <div class="card-meta">${escHtml(bgameData["category"] || '')}</div>
               </div>
-            </summary>
-            <div class="bgame-content">
-              <div><strong>Players:</strong> ${bgameData["min_players"]}–${bgameData["max_players"]}</div>
-              <div><strong>Min Age:</strong> ${bgameData["min_age"]}+</div>
-              <div><strong>Play Time:</strong> ${bgameData["min_play_time"] || '?'}–${bgameData["max_play_time"] || '?'} min</div>
+              <span class="flip-hint">&#8635;</span>
             </div>
-          </details>
+            <div class="flip-card-back">
+              <div class="card-title">${escHtml(title)}</div>
+              <div class="card-meta">${escHtml(bgameData["category"] || '')}</div>
+              <div class="card-detail-line"><strong>Players:</strong> ${escHtml(bgameData["min_players"])}–${escHtml(bgameData["max_players"])}</div>
+              <div class="card-detail-line"><strong>Min Age:</strong> ${escHtml(bgameData["min_age"])}+</div>
+              <div class="card-detail-line"><strong>Play Time:</strong> ${escHtml(bgameData["min_play_time"] || '?')}–${escHtml(bgameData["max_play_time"] || '?')} min</div>
+            </div>
+          </div>
         `;
+
+        listItem.querySelector('.flip-card-inner').addEventListener('click', () => {
+          listItem.classList.toggle('flipped');
+        });
 
         bgameList.appendChild(listItem);
       });
@@ -553,19 +580,16 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Add event listeners
     document.addEventListener('DOMContentLoaded', () => {
-    loadDatabase();
-    
-    // Add event listeners for all search inputs
-    document.querySelector('button').addEventListener('click', searchbgames);
-    
     document.getElementById('bgame-search').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
       searchbgames();
     }
     });
-    
+
     // Add change event listeners for dropdowns
     document.getElementById('bgame-category').addEventListener('change', searchbgames);
+    document.getElementById('bgame-time').addEventListener('change', searchbgames);
+    document.getElementById('bgame-players').addEventListener('change', searchbgames);
     });
     </script>
 
@@ -580,6 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div class="chat-input-wrapper">
           <input type="text" id="user-input" placeholder="Ask a question..." />
           <button onclick="sendMessage()">Ask</button>
+          <button onclick="resetConversation()" title="Start a new conversation">New chat</button>
         </div>
       </div>
     </div>
@@ -587,6 +612,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 <script>
+  let conversationHistory = [];
+
   function toggleChatbot() {
     const body = document.getElementById("chatbot-body");
     body.style.display = body.style.display === "none" ? "flex" : "none";
@@ -626,20 +653,28 @@ document.addEventListener('DOMContentLoaded', () => {
     chatBox.appendChild(botMessage);
     chatBox.scrollTop = chatBox.scrollHeight;
 
-    // Send to backend
+    // Send to backend, including prior turns so follow-up questions have context
     try {
       const response = await fetch("https://sestock.pythonanywhere.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question }),
+        body: JSON.stringify({ question, history: conversationHistory }),
       });
 
       const data = await response.json();
       botMessage.textContent = data.response;
       chatBox.scrollTop = chatBox.scrollHeight;
+
+      conversationHistory.push({ role: "user", content: question });
+      conversationHistory.push({ role: "assistant", content: data.response });
     } catch (error) {
       botMessage.textContent = "Oops! Something went wrong.";
     }
+  }
+
+  function resetConversation() {
+    conversationHistory = [];
+    document.getElementById("chat-box").innerHTML = "";
   }
 
   // Optional: show chatbot open by default
