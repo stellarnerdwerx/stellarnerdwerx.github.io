@@ -330,6 +330,33 @@ button:hover {
     margin-top: 4px;
 }
 
+.randomizer-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+}
+
+.randomizer-tab {
+    padding: 8px 18px;
+    background: #eee;
+    color: #555;
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 0.95em;
+    font-weight: bold;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.randomizer-tab:hover {
+    background: #ddd;
+}
+
+.randomizer-tab.active {
+    background: #6f42c1;
+    color: white;
+}
+
 .randomizer-intro {
     color: #666;
     margin-top: -8px;

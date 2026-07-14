@@ -53,10 +53,9 @@
         
         // Clear content from all sections
         sections.forEach(section => {
-            const list = section.querySelector('ul');
-            if (list) {
+            section.querySelectorAll('ul').forEach(list => {
                 list.innerHTML = ''; // Clear the list items
-            }
+            });
     });
 
     // Show the clicked section
@@ -320,6 +319,55 @@ document.addEventListener('DOMContentLoaded', () => {
     </section>
     <script>
         // Function to search for video games
+// Builds a flip-card <li> for a single video game row. Shared by search results and the randomizer.
+function buildVgameCard(columns, vgame) {
+  const listItem = document.createElement('li');
+  listItem.className = 'vgame-item flip-card';
+
+  const vgameData = {};
+  columns.forEach((col, index) => {
+    vgameData[col.toLowerCase()] = vgame[index];
+  });
+
+  const nonPlatformCols = ['id', 'title', 'rating', 'plot', 'poster_url'];
+  const consoles = columns.filter(col => !nonPlatformCols.includes(col.toLowerCase()) && Number(vgameData[col.toLowerCase()]) === 1).map(col => col);
+  const consolesfinal = consoles.map(c => c.replace('_', ' ').replace('THREE ', '3'));
+
+  const title = vgameData.title || '';
+  const pills = consolesfinal.length > 0
+    ? consolesfinal.map(c => `<span class="pill">${escHtml(c)}</span>`).join('')
+    : '<span class="pill">No consoles listed</span>';
+  const posterFace = vgameData.poster_url
+    ? `<img src="${escHtml(vgameData.poster_url)}" alt="${escHtml(title)} cover art" class="card-poster" loading="lazy" onerror="this.outerHTML='&lt;div class=&quot;card-poster-placeholder&quot;&gt;🎮&lt;/div&gt;'">`
+    : `<div class="card-poster-placeholder">🎮</div>`;
+
+  listItem.innerHTML = `
+    <div class="flip-card-inner">
+      <div class="flip-card-front">
+        ${posterFace}
+        <div class="card-caption">
+          <div class="card-title">${escHtml(title)}</div>
+          <div class="card-meta">${vgameData.rating ? '★ ' + escHtml(vgameData.rating) : consolesfinal.length + ' platform' + (consolesfinal.length !== 1 ? 's' : '')}</div>
+        </div>
+        <span class="flip-hint">&#8635;</span>
+      </div>
+      <div class="flip-card-back">
+        <div class="card-title">${escHtml(title)}</div>
+        ${vgameData.rating ? `<div class="card-meta">Rating: ${escHtml(vgameData.rating)}</div>` : ''}
+        <div class="card-detail-line"><strong>Available on:</strong></div>
+        <div class="pill-list">${pills}</div>
+        ${vgameData.plot ? `<div class="card-plot">${escHtml(vgameData.plot)}</div>` : ''}
+      </div>
+    </div>
+  `;
+
+  listItem.querySelector('.flip-card-inner').addEventListener('click', () => {
+    listItem.classList.toggle('flipped');
+  });
+
+  return listItem;
+}
+
 function searchvgames() {
   try {
     if (!db) {
@@ -358,55 +406,9 @@ function searchvgames() {
 
     if (results && results.length > 0 && results[0].values.length > 0) {
       const columns = results[0].columns;
-      
+
       results[0].values.forEach(vgame => {
-        const listItem = document.createElement('li');
-        listItem.className = 'vgame-item flip-card';
-
-        // Create an object mapping column names to values
-        const vgameData = {};
-        columns.forEach((col, index) => {
-          vgameData[col.toLowerCase()] = vgame[index];
-        });
-
-        // Build the display HTML using the mapped data
-        const nonPlatformCols = ['id', 'title', 'rating', 'plot', 'poster_url'];
-        const consoles = columns.filter(col => !nonPlatformCols.includes(col.toLowerCase()) && Number(vgameData[col.toLowerCase()]) === 1).map(col => col);
-        var consolesfinal = consoles.map(consoles => consoles.replace('_', ' ').replace('THREE ','3'));
-
-        const title = vgameData.title || '';
-        const pills = consolesfinal.length > 0
-          ? consolesfinal.map(c => `<span class="pill">${escHtml(c)}</span>`).join('')
-          : '<span class="pill">No consoles listed</span>';
-        const posterFace = vgameData.poster_url
-          ? `<img src="${escHtml(vgameData.poster_url)}" alt="${escHtml(title)} cover art" class="card-poster" loading="lazy" onerror="this.outerHTML='&lt;div class=&quot;card-poster-placeholder&quot;&gt;🎮&lt;/div&gt;'">`
-          : `<div class="card-poster-placeholder">🎮</div>`;
-
-        listItem.innerHTML = `
-          <div class="flip-card-inner">
-            <div class="flip-card-front">
-              ${posterFace}
-              <div class="card-caption">
-                <div class="card-title">${escHtml(title)}</div>
-                <div class="card-meta">${vgameData.rating ? '★ ' + escHtml(vgameData.rating) : consolesfinal.length + ' platform' + (consolesfinal.length !== 1 ? 's' : '')}</div>
-              </div>
-              <span class="flip-hint">&#8635;</span>
-            </div>
-            <div class="flip-card-back">
-              <div class="card-title">${escHtml(title)}</div>
-              ${vgameData.rating ? `<div class="card-meta">Rating: ${escHtml(vgameData.rating)}</div>` : ''}
-              <div class="card-detail-line"><strong>Available on:</strong></div>
-              <div class="pill-list">${pills}</div>
-              ${vgameData.plot ? `<div class="card-plot">${escHtml(vgameData.plot)}</div>` : ''}
-            </div>
-          </div>
-        `;
-
-        listItem.querySelector('.flip-card-inner').addEventListener('click', () => {
-          listItem.classList.toggle('flipped');
-        });
-
-        vgameList.appendChild(listItem);
+        vgameList.appendChild(buildVgameCard(columns, vgame));
       });
     } else if (results[0].values.length === 0) {
       vgameList.innerHTML = '<li class="no-results">No video games found.</li>';
@@ -607,44 +609,147 @@ document.addEventListener('DOMContentLoaded', () => {
     <!-- Randomizer Section -->
     <section id="randomizer" style="display:none">
       <h2>🎲 Pick For Me</h2>
-      <p class="randomizer-intro">Can't decide what to watch? Set a few knobs if you want, or leave them all blank and let fate handle it.</p>
-      <div class="search">
-          <select id="rand-genre">
-              <option value="">Any Genre</option>
-              <option value="action">Action</option>
-              <option value="animation">Animation</option>
-              <option value="comedy">Comedy</option>
-              <option value="drama">Drama</option>
-              <option value="family">Family</option>
-              <option value="holiday">Holiday</option>
-              <option value="horror">Horror</option>
-              <option value="mystery">Mystery</option>
-              <option value="romance">Romance</option>
-              <option value="sci-fi">Sci-Fi</option>
-              <option value="thriller">Thriller</option>
-          </select>
 
-          <select id="rand-decade">
-              <option value="">Any Era</option>
-              <option value="0-1979">Before 1980</option>
-              <option value="1980-1989">1980s</option>
-              <option value="1990-1999">1990s</option>
-              <option value="2000-2009">2000s</option>
-              <option value="2010-2019">2010s</option>
-              <option value="2020-2099">2020s+</option>
-          </select>
+      <nav class="randomizer-tabs">
+        <button type="button" class="randomizer-tab active" id="rand-tab-movies" onclick="switchRandomizerTab('movies')">🎬 Movies</button>
+        <button type="button" class="randomizer-tab" id="rand-tab-vgames" onclick="switchRandomizerTab('vgames')">🎮 Video Games</button>
+      </nav>
 
-          <input type="text" id="rand-director" placeholder="Director (optional)">
-          <input type="text" id="rand-actor" placeholder="Actor (optional)">
+      <div id="rand-movies-panel">
+        <p class="randomizer-intro">Can't decide what to watch? Set a few knobs if you want, or leave them all blank and let fate handle it.</p>
+        <div class="search">
+            <select id="rand-genre">
+                <option value="">Any Genre</option>
+                <option value="action">Action</option>
+                <option value="animation">Animation</option>
+                <option value="comedy">Comedy</option>
+                <option value="drama">Drama</option>
+                <option value="family">Family</option>
+                <option value="holiday">Holiday</option>
+                <option value="horror">Horror</option>
+                <option value="mystery">Mystery</option>
+                <option value="romance">Romance</option>
+                <option value="sci-fi">Sci-Fi</option>
+                <option value="thriller">Thriller</option>
+            </select>
 
-          <button onclick="pickRandomMovie()">🎲 Pick For Me!</button>
+            <select id="rand-decade">
+                <option value="">Any Era</option>
+                <option value="0-1979">Before 1980</option>
+                <option value="1980-1989">1980s</option>
+                <option value="1990-1999">1990s</option>
+                <option value="2000-2009">2000s</option>
+                <option value="2010-2019">2010s</option>
+                <option value="2020-2099">2020s+</option>
+            </select>
+
+            <input type="text" id="rand-director" placeholder="Director (optional)">
+            <input type="text" id="rand-actor" placeholder="Actor (optional)">
+
+            <button onclick="pickRandomMovie()">🎲 Pick For Me!</button>
+        </div>
+
+        <div id="rand-result-count"></div>
+        <ul id="rand-result" class="rand-result-grid"></ul>
       </div>
 
-      <div id="rand-result-count"></div>
-      <ul id="rand-result" class="rand-result-grid"></ul>
+      <div id="rand-vgames-panel" style="display:none">
+        <p class="randomizer-intro">Can't decide what to play? Set a few knobs if you want, or leave them all blank and let fate handle it.</p>
+        <div class="search">
+            <select id="rand-vgame-console">
+                <option value="">Any Console</option>
+                <option value="NES">NES</option>
+                <option value="SNES">SNES</option>
+                <option value="N64">Nintendo 64</option>
+                <option value="GAMECUBE">Gamecube</option>
+                <option value="WII">Wii</option>
+                <option value="WII_U">Wii U</option>
+                <option value="SWITCH">Switch</option>
+                <option value="GAMEBOY">Gameboy</option>
+                <option value="GAMEBOY_COLOR">Gameboy Color</option>
+                <option value="GAMEBOY_ADVANCE">Gameboy Advance</option>
+                <option value="DS">DS</option>
+                <option value="THREE_DS">3DS</option>
+                <option value="PS1">Playstation 1</option>
+                <option value="PS2">Playstation 2</option>
+                <option value="PS3">Playstation 3</option>
+                <option value="PS4">Playstation 4</option>
+                <option value="PS5">Playstation 5</option>
+                <option value="PS4_VR">Playstation VR</option>
+                <option value="PSP">Playstation Portable</option>
+                <option value="PS_VITA">Playstation Vita</option>
+                <option value="SEGA_GENESIS">Sega Genesis</option>
+                <option value="SEGA_CD">Sega CD</option>
+                <option value="SEGA_GAMEGEAR">Sega Gamegear</option>
+                <option value="TENGEN">Tengen</option>
+                <option value="XBOX">XBOX</option>
+                <option value="XBOX_360">XBOX 360</option>
+                <option value="XBOX_KINECT">XBOX Kinect</option>
+                <option value="XBOX_ONE">XBOX One</option>
+            </select>
+
+            <button onclick="pickRandomVgame()">🎲 Pick For Me!</button>
+        </div>
+
+        <div id="rand-vgame-result-count"></div>
+        <ul id="rand-vgame-result" class="rand-result-grid"></ul>
+      </div>
     </section>
 
     <script>
+      function switchRandomizerTab(which) {
+        const isMovies = which === 'movies';
+        document.getElementById('rand-movies-panel').style.display = isMovies ? 'block' : 'none';
+        document.getElementById('rand-vgames-panel').style.display = isMovies ? 'none' : 'block';
+        document.getElementById('rand-tab-movies').classList.toggle('active', isMovies);
+        document.getElementById('rand-tab-vgames').classList.toggle('active', !isMovies);
+      }
+
+      function pickRandomVgame() {
+        try {
+          if (!db) {
+            throw new Error('Database not loaded yet');
+          }
+
+          const consoleVal = document.getElementById('rand-vgame-console').value;
+
+          let conditions = [];
+          if (consoleVal) {
+            conditions.push(`${consoleVal} = '1'`);
+          }
+
+          let query = "SELECT * FROM games_video WHERE 1=1";
+          if (conditions.length > 0) {
+            query += ` AND ${conditions.join(' AND ')}`;
+          }
+
+          const countResult = db.exec(`SELECT COUNT(*) FROM (${query})`);
+          const matchCount = countResult[0].values[0][0];
+
+          const resultCountEl = document.getElementById('rand-vgame-result-count');
+          const resultList = document.getElementById('rand-vgame-result');
+          resultList.innerHTML = '';
+
+          if (matchCount === 0) {
+            resultCountEl.innerHTML = `No video games match those filters — try loosening them up.`;
+            return;
+          }
+
+          resultCountEl.innerHTML = `Picked from ${matchCount} matching video game${matchCount !== 1 ? 's' : ''}:`;
+
+          const pickResult = db.exec(`${query} ORDER BY RANDOM() LIMIT 1`);
+          const columns = pickResult[0].columns;
+          const vgame = pickResult[0].values[0];
+
+          const card = buildVgameCard(columns, vgame);
+          card.classList.add('rand-card');
+          resultList.appendChild(card);
+        } catch (error) {
+          console.error('Randomizer error:', error);
+          document.getElementById('rand-vgame-result-count').innerHTML = 'Something went wrong picking a video game.';
+        }
+      }
+
       function pickRandomMovie() {
         try {
           if (!db) {
