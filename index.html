@@ -309,6 +309,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 <option value="XBOX_KINECT">XBOX Kinect</option>
                 <option value="XBOX_ONE">XBOX One</option>
             </select>
+            <select id="vgame-genre">
+                <option value="">Select Genre</option>
+                <option value="Action">Action</option>
+                <option value="Adventure">Adventure</option>
+                <option value="Shooter">Shooter</option>
+                <option value="Platformer">Platformer</option>
+                <option value="RPG">RPG</option>
+                <option value="Arcade">Arcade</option>
+                <option value="Fighting">Fighting</option>
+                <option value="Sports">Sports</option>
+                <option value="Racing">Racing</option>
+                <option value="Puzzle">Puzzle</option>
+                <option value="Family">Family</option>
+                <option value="Strategy">Strategy</option>
+                <option value="Simulation">Simulation</option>
+            </select>
             <button onclick="searchvgames()">Search</button>
         </div>
 
@@ -376,6 +392,7 @@ function searchvgames() {
 
     const title = document.getElementById('vgame-search').value.toLowerCase();
     const consoleVal = document.getElementById('vgame-console').value;
+    const genreVal = document.getElementById('vgame-genre').value;
 
     let query = "SELECT * FROM games_video WHERE 1=1";
     let conditions = [];
@@ -386,6 +403,10 @@ function searchvgames() {
 
     if (consoleVal && consoleVal !== '') {
       conditions.push(`${consoleVal} = '1'`);
+    }
+
+    if (genreVal && genreVal !== '') {
+      conditions.push(`LOWER(genre) LIKE '%${genreVal.toLowerCase()}%'`);
     }
 
     if (conditions.length > 0) {
@@ -431,6 +452,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Add change event listeners for dropdowns
   document.getElementById('vgame-console').addEventListener('change', searchvgames);
+  document.getElementById('vgame-genre').addEventListener('change', searchvgames);
 });
     </script>
 
@@ -688,6 +710,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 <option value="XBOX_ONE">XBOX One</option>
             </select>
 
+            <select id="rand-vgame-genre">
+                <option value="">Any Genre</option>
+                <option value="Action">Action</option>
+                <option value="Adventure">Adventure</option>
+                <option value="Shooter">Shooter</option>
+                <option value="Platformer">Platformer</option>
+                <option value="RPG">RPG</option>
+                <option value="Arcade">Arcade</option>
+                <option value="Fighting">Fighting</option>
+                <option value="Sports">Sports</option>
+                <option value="Racing">Racing</option>
+                <option value="Puzzle">Puzzle</option>
+                <option value="Family">Family</option>
+                <option value="Strategy">Strategy</option>
+                <option value="Simulation">Simulation</option>
+            </select>
+
             <button onclick="pickRandomVgame()">🎲 Pick For Me!</button>
         </div>
 
@@ -712,10 +751,14 @@ document.addEventListener('DOMContentLoaded', () => {
           }
 
           const consoleVal = document.getElementById('rand-vgame-console').value;
+          const genreVal = document.getElementById('rand-vgame-genre').value;
 
           let conditions = [];
           if (consoleVal) {
             conditions.push(`${consoleVal} = '1'`);
+          }
+          if (genreVal) {
+            conditions.push(`LOWER(genre) LIKE '%${genreVal.toLowerCase()}%'`);
           }
 
           let query = "SELECT * FROM games_video WHERE 1=1";
