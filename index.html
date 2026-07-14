@@ -370,28 +370,34 @@ function searchvgames() {
         });
 
         // Build the display HTML using the mapped data
-        const consoles = columns.filter(col => col !== 'title' && Number(vgameData[col.toLowerCase()]) === 1).map(col => col);
+        const nonPlatformCols = ['id', 'title', 'rating', 'plot', 'poster_url'];
+        const consoles = columns.filter(col => !nonPlatformCols.includes(col.toLowerCase()) && Number(vgameData[col.toLowerCase()]) === 1).map(col => col);
         var consolesfinal = consoles.map(consoles => consoles.replace('_', ' ').replace('THREE ','3'));
 
         const title = vgameData.title || '';
         const pills = consolesfinal.length > 0
           ? consolesfinal.map(c => `<span class="pill">${escHtml(c)}</span>`).join('')
           : '<span class="pill">No consoles listed</span>';
+        const posterFace = vgameData.poster_url
+          ? `<img src="${escHtml(vgameData.poster_url)}" alt="${escHtml(title)} cover art" class="card-poster" loading="lazy" onerror="this.outerHTML='&lt;div class=&quot;card-poster-placeholder&quot;&gt;🎮&lt;/div&gt;'">`
+          : `<div class="card-poster-placeholder">🎮</div>`;
 
         listItem.innerHTML = `
           <div class="flip-card-inner">
             <div class="flip-card-front">
-              <div class="card-poster-placeholder">🎮</div>
+              ${posterFace}
               <div class="card-caption">
                 <div class="card-title">${escHtml(title)}</div>
-                <div class="card-meta">${consolesfinal.length} platform${consolesfinal.length !== 1 ? 's' : ''}</div>
+                <div class="card-meta">${vgameData.rating ? '★ ' + escHtml(vgameData.rating) : consolesfinal.length + ' platform' + (consolesfinal.length !== 1 ? 's' : '')}</div>
               </div>
               <span class="flip-hint">&#8635;</span>
             </div>
             <div class="flip-card-back">
               <div class="card-title">${escHtml(title)}</div>
+              ${vgameData.rating ? `<div class="card-meta">Rating: ${escHtml(vgameData.rating)}</div>` : ''}
               <div class="card-detail-line"><strong>Available on:</strong></div>
               <div class="pill-list">${pills}</div>
+              ${vgameData.plot ? `<div class="card-plot">${escHtml(vgameData.plot)}</div>` : ''}
             </div>
           </div>
         `;
@@ -551,16 +557,17 @@ document.addEventListener('DOMContentLoaded', () => {
               <div class="card-poster-placeholder">🎲</div>
               <div class="card-caption">
                 <div class="card-title">${escHtml(title)}</div>
-                <div class="card-meta">${escHtml(bgameData["category"] || '')}</div>
+                <div class="card-meta">${bgameData["rating"] ? '★ ' + escHtml(bgameData["rating"]) : escHtml(bgameData["category"] || '')}</div>
               </div>
               <span class="flip-hint">&#8635;</span>
             </div>
             <div class="flip-card-back">
               <div class="card-title">${escHtml(title)}</div>
-              <div class="card-meta">${escHtml(bgameData["category"] || '')}</div>
+              <div class="card-meta">${escHtml(bgameData["category"] || '')}${bgameData["rating"] ? ' · Rating ' + escHtml(bgameData["rating"]) : ''}</div>
               <div class="card-detail-line"><strong>Players:</strong> ${escHtml(bgameData["min_players"])}–${escHtml(bgameData["max_players"])}</div>
               <div class="card-detail-line"><strong>Min Age:</strong> ${escHtml(bgameData["min_age"])}+</div>
               <div class="card-detail-line"><strong>Play Time:</strong> ${escHtml(bgameData["min_play_time"] || '?')}–${escHtml(bgameData["max_play_time"] || '?')} min</div>
+              ${bgameData["plot"] ? `<div class="card-plot">${escHtml(bgameData["plot"])}</div>` : ''}
             </div>
           </div>
         `;
