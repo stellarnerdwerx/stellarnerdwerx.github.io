@@ -126,6 +126,17 @@ footer {
   padding: 1em 0;
 }
 
+.bgg-attribution {
+  display: inline-block;
+  margin-top: 10px;
+}
+
+.bgg-attribution img {
+  height: 45px;
+  width: auto;
+  vertical-align: middle;
+}
+
 
 
 /* Search Section Styles */
