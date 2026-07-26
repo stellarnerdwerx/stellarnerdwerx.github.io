@@ -265,6 +265,15 @@ button:hover {
     display: block;
 }
 
+/* Video game / board game source images (RAWG screenshots, BGG box art) are typically
+   square-ish or landscape, unlike tall movie posters — cropping them with object-fit:cover
+   inside a tall card chops off most of the artwork. Show the whole image instead. */
+.vgame-item.flip-card .card-poster,
+.bgame-item.flip-card .card-poster {
+    object-fit: contain;
+    background: #eef0f5;
+}
+
 .flip-card-front .card-poster-placeholder {
     width: 100%;
     flex: 1;
