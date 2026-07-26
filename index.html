@@ -504,6 +504,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
     <script>
         // Function to search for bgames
+        // Builds a flip-card <li> for a single board game row. Shared by search results and the randomizer.
+        function buildBgameCard(columns, bgame) {
+          const listItem = document.createElement('li');
+          listItem.className = 'bgame-item flip-card';
+
+          const bgameData = {};
+          columns.forEach((col, index) => {
+            bgameData[col.toLowerCase()] = bgame[index];
+          });
+
+          const title = bgameData["title"] || '';
+          const posterFace = bgameData.poster_url
+            ? `<img src="${escHtml(bgameData.poster_url)}" alt="${escHtml(title)} box art" class="card-poster" loading="lazy" onerror="this.outerHTML='&lt;div class=&quot;card-poster-placeholder&quot;&gt;🎲&lt;/div&gt;'">`
+            : `<div class="card-poster-placeholder">🎲</div>`;
+
+          listItem.innerHTML = `
+            <div class="flip-card-inner">
+              <div class="flip-card-front">
+                ${posterFace}
+                <div class="card-caption">
+                  <div class="card-title">${escHtml(title)}</div>
+                  <div class="card-meta">${bgameData["rating"] ? '★ ' + escHtml(bgameData["rating"]) : escHtml(bgameData["category"] || '')}</div>
+                </div>
+                <span class="flip-hint">&#8635;</span>
+              </div>
+              <div class="flip-card-back">
+                <div class="card-title">${escHtml(title)}</div>
+                <div class="card-meta">${escHtml(bgameData["category"] || '')}${bgameData["rating"] ? ' · Rating ' + escHtml(bgameData["rating"]) : ''}</div>
+                <div class="card-detail-line"><strong>Players:</strong> ${escHtml(bgameData["min_players"])}–${escHtml(bgameData["max_players"])}</div>
+                <div class="card-detail-line"><strong>Min Age:</strong> ${escHtml(bgameData["min_age"])}+</div>
+                <div class="card-detail-line"><strong>Play Time:</strong> ${escHtml(bgameData["min_play_time"] || '?')}–${escHtml(bgameData["max_play_time"] || '?')} min</div>
+                ${bgameData["plot"] ? `<div class="card-plot">${escHtml(bgameData["plot"])}</div>` : ''}
+              </div>
+            </div>
+          `;
+
+          listItem.querySelector('.flip-card-inner').addEventListener('click', () => {
+            listItem.classList.toggle('flipped');
+          });
+
+          return listItem;
+        }
+
         function searchbgames() {
   try {
     if (!db) {
@@ -565,42 +608,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const columns = results[0].columns;
 
       results[0].values.forEach(bgame => {
-        const listItem = document.createElement('li');
-        listItem.className = 'bgame-item flip-card';
-
-        const bgameData = {};
-        columns.forEach((col, index) => {
-          bgameData[col.toLowerCase()] = bgame[index];
-        });
-
-        const title = bgameData["title"] || '';
-
-        listItem.innerHTML = `
-          <div class="flip-card-inner">
-            <div class="flip-card-front">
-              <div class="card-poster-placeholder">🎲</div>
-              <div class="card-caption">
-                <div class="card-title">${escHtml(title)}</div>
-                <div class="card-meta">${bgameData["rating"] ? '★ ' + escHtml(bgameData["rating"]) : escHtml(bgameData["category"] || '')}</div>
-              </div>
-              <span class="flip-hint">&#8635;</span>
-            </div>
-            <div class="flip-card-back">
-              <div class="card-title">${escHtml(title)}</div>
-              <div class="card-meta">${escHtml(bgameData["category"] || '')}${bgameData["rating"] ? ' · Rating ' + escHtml(bgameData["rating"]) : ''}</div>
-              <div class="card-detail-line"><strong>Players:</strong> ${escHtml(bgameData["min_players"])}–${escHtml(bgameData["max_players"])}</div>
-              <div class="card-detail-line"><strong>Min Age:</strong> ${escHtml(bgameData["min_age"])}+</div>
-              <div class="card-detail-line"><strong>Play Time:</strong> ${escHtml(bgameData["min_play_time"] || '?')}–${escHtml(bgameData["max_play_time"] || '?')} min</div>
-              ${bgameData["plot"] ? `<div class="card-plot">${escHtml(bgameData["plot"])}</div>` : ''}
-            </div>
-          </div>
-        `;
-
-        listItem.querySelector('.flip-card-inner').addEventListener('click', () => {
-          listItem.classList.toggle('flipped');
-        });
-
-        bgameList.appendChild(listItem);
+        bgameList.appendChild(buildBgameCard(columns, bgame));
       });
     } else if (results[0].values.length === 0) {
       bgameList.innerHTML = '<li class="no-results">No board games found.</li>';
