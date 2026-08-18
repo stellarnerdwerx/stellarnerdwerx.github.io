@@ -1,14 +1,9 @@
-# config
-PATH = '/Users/lena/Documents/DATABASES/'
-DATA_PATH = PATH+'movies_with_info_20250601.csv'
-CHROMA_DB_PATH = "/home/sestock/chroma_db"
-COLLECTION_NAME = "movieinfo_collection"
+# config — shared constants needed wherever the chatbot actually runs (desktop or PythonAnywhere)
+DB_PATH = "assets/stellarsearch.db"
+OUTPUT_NPZ = "movie_embeddings.npz"
 
-OUTPUT_JSON = "exported_movie_embeddings.json"
+OPENAI_EMBEDDING_MODEL = 'text-embedding-3-small'
+EMBEDDING_DIMENSIONS = 1536  # model's full native dimension; truncating hurt retrieval quality
 
-
-# EMBEDDING_MODEL = 'all-MiniLM-L6-v2'
-OPENAI_EMBEDDING_MODEL='text-embedding-3-small'
-
-OPENAI_MODEL = "gpt-3.5-turbo"  
+OPENAI_MODEL = "gpt-3.5-turbo"
 TOP_K = 5

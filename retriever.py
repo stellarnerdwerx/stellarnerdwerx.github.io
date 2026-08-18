@@ -1,72 +1,72 @@
 import os
-import json
 import numpy as np
 import openai
 from dotenv import load_dotenv
+
+from config import OPENAI_EMBEDDING_MODEL, EMBEDDING_DIMENSIONS, OUTPUT_NPZ
 
 load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 openai.api_key = OPENAI_API_KEY
 
-# Load JSON file with documents and embeddings
-DB_JSON_PATH = os.getenv("DB_JSON_PATH", "exported_movie_embeddings.json")
+# Load the compressed embeddings archive (built by embedding.py)
+DB_NPZ_PATH = os.getenv("DB_NPZ_PATH", OUTPUT_NPZ)
 
-with open(DB_JSON_PATH, 'r') as f:
-    database = json.load(f)
+_db = np.load(DB_NPZ_PATH, allow_pickle=True)
+embeddings_matrix = _db["embeddings"].astype(np.float32)  # shape (N, D)
+titles = _db["titles"]
+plots = _db["plots"]
+types = _db["types"] if "types" in _db.files else np.array(["movie"] * len(titles), dtype=object)
+_norms = np.linalg.norm(embeddings_matrix, axis=1)
 
-def cosine_similarity(vec1, vec2):
-    vec1 = np.array(vec1)
-    vec2 = np.array(vec2)
-    return np.dot(vec1, vec2) / (np.linalg.norm(vec1) * np.linalg.norm(vec2))
+TYPE_LABELS = {"movie": "Movie", "game": "Video Game"}
 
-def embed_text(text, model="text-embedding-3-large"):
+def embed_text(text, model=OPENAI_EMBEDDING_MODEL, dimensions=EMBEDDING_DIMENSIONS):
     response = openai.embeddings.create(
         input=text,
-        model=model
+        model=model,
+        dimensions=dimensions
     )
-    return response.data[0].embedding
+    return np.array(response.data[0].embedding, dtype=np.float32)
 
-def get_answer(question, top_k=5):
-    # Embed the question
+MAX_HISTORY_TURNS = 12
+
+def get_answer(question, top_k=5, history=None):
+    # Embed the question (retrieval is always based on the latest question)
     question_embedding = embed_text(question)
 
-    # Calculate similarity scores against all items
-    similarities = []
-    for item in database:
-        sim = cosine_similarity(question_embedding, item['embedding'])
-        similarities.append((sim, item))
+    # Vectorized cosine similarity against every stored movie/game at once
+    q_norm = np.linalg.norm(question_embedding)
+    sims = embeddings_matrix @ question_embedding / (_norms * q_norm + 1e-10)
 
-    # Get top k matches
-    similarities.sort(key=lambda x: x[0], reverse=True)
-    top_matches = similarities[:top_k]
+    top_idx = np.argpartition(-sims, top_k)[:top_k]
+    top_idx = top_idx[np.argsort(-sims[top_idx])]
 
     # Build context string from top matches
-    context_blocks = []
-    for _, item in top_matches:
-        context_blocks.append(f"[{item['title']}]: {item['plot']}")
-
+    context_blocks = [
+        f"[{TYPE_LABELS.get(str(types[i]), 'Movie')}: {titles[i]}]: {plots[i]}" for i in top_idx
+    ]
     context = "\n\n".join(context_blocks)
 
-    prompt = f"""You are a helpful assistant that knows about my personal movie collection.
+    system_prompt = f"""You are a helpful assistant that knows about my personal movie and video game collection.
 
-The following context comes from my personal database of movies that my family owns.
-Each entry represents a movie I have in one or more formats (DVD, Blu-Ray, 4K, etc) and includes information sourced from places like IMDb and Rotten Tomatoes.
+The following context comes from my personal database of movies and video games that my family owns.
+Each entry is tagged as either a Movie or a Video Game, and represents an item I have in one or more formats/platforms (DVD, Blu-Ray, 4K, Switch, PS5, etc), with information sourced from places like IMDb, Rotten Tomatoes, and RAWG. Use the conversation history to understand follow-up questions.
 
 Context:
-{context}
+{context}"""
 
-Question: {question}
-
-Answer:"""
+    messages = [{"role": "system", "content": system_prompt}]
+    if history:
+        # history entries are {"role": "user"|"assistant", "content": "..."}
+        messages.extend(history[-MAX_HISTORY_TURNS:])
+    messages.append({"role": "user", "content": question})
 
     try:
         response = openai.chat.completions.create(
             model="gpt-4o-mini",
-            messages=[
-                {"role": "system", "content": "Answer only based on the provided context."},
-                {"role": "user", "content": prompt}
-            ],
+            messages=messages,
             temperature=0.7
         )
         return response.choices[0].message.content

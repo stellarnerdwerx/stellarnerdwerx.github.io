@@ -20,7 +20,8 @@ def chat():
         return jsonify({"error": "Missing 'question' in request body"}), 400
 
     user_input = data["question"]
-    answer = get_answer(user_input)
+    history = data.get("history", [])
+    answer = get_answer(user_input, history=history)
     return jsonify({"response": answer})
 
 # No app.run() needed for deployment on PythonAnywhere
