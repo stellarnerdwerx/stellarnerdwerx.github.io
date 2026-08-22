@@ -44,7 +44,7 @@
         <!-- Who's browsing: log in to mark movies seen / want-to-watch / liked -->
         <div class="watch-auth" id="watch-auth">
           <div id="watch-auth-login">
-            <input type="text" id="watch-auth-username" placeholder="Username" autocomplete="username">
+            <input type="text" id="watch-auth-username" placeholder="Username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false">
             <input type="password" id="watch-auth-password" placeholder="Password" autocomplete="current-password">
             <button onclick="watchLogin()">Log In</button>
             <span id="watch-auth-error" class="watch-auth-error"></span>
@@ -458,7 +458,7 @@ async function fetchUsers() {
 }
 
 async function watchLogin() {
-  const username = document.getElementById('watch-auth-username').value.trim();
+  const username = document.getElementById('watch-auth-username').value.trim().toLowerCase();
   const password = document.getElementById('watch-auth-password').value;
   const errorEl = document.getElementById('watch-auth-error');
   errorEl.textContent = '';

@@ -75,7 +75,8 @@ def create_user(username, display_name, password):
 
 def verify_login(username, password):
     conn = get_conn()
-    row = conn.execute("SELECT * FROM users WHERE username = ?", (username,)).fetchone()
+    # Case-insensitive: mobile keyboards auto-capitalize the first letter of text fields.
+    row = conn.execute("SELECT * FROM users WHERE LOWER(username) = LOWER(?)", (username,)).fetchone()
     conn.close()
     if row and check_password_hash(row["password_hash"], password):
         return dict(row)
