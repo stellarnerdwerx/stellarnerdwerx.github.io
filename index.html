@@ -255,7 +255,7 @@ function buildMovieCard(columns, movie) {
   // Public consensus badge: 👍 if either of us liked it, 👍👍 if we both did. No names attached.
   const likedCount = likedCounts[movieData.id] || 0;
   const likedBadge = likedCount > 0
-    ? `<div class="liked-badge" title="${likedCount === 1 ? 'One of us liked this' : 'We both liked this'}">${'👍'.repeat(likedCount)}</div>`
+    ? ` <span class="liked-badge" title="${likedCount === 1 ? 'One of us liked this' : 'We both liked this'}">${'👍'.repeat(likedCount)}</span>`
     : '';
 
   const myRating = getMyRating(movieData.id);
@@ -271,10 +271,9 @@ function buildMovieCard(columns, movie) {
     <div class="flip-card-inner">
       <div class="flip-card-front">
         ${posterFace}
-        ${likedBadge}
         <div class="card-caption">
           <div class="card-title">${escHtml(title)}</div>
-          <div class="card-meta">${movieData.year || ''}${movieData.rating ? ' · ★ ' + movieData.rating : ''}</div>
+          <div class="card-meta">${movieData.year || ''}${movieData.rating ? ' · ★ ' + movieData.rating : '' }${likedBadge}</div>
         </div>
         <span class="flip-hint">&#8635;</span>
       </div>

@@ -423,14 +423,6 @@ button:hover {
 }
 
 .liked-badge {
-    position: absolute;
-    top: 6px;
-    left: 6px;
-    background: rgba(0,0,0,0.55);
-    color: #fff;
-    padding: 2px 7px;
-    border-radius: 999px;
-    font-size: 0.85em;
     letter-spacing: 1px;
 }
 
