@@ -58,12 +58,16 @@ header h1 {
 /* Main navigation styles */
 nav {
   background: linear-gradient(135deg, #3498db, #1abc9c);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 nav ul {
     list-style-type: none;
     padding: 0;
     margin: 0;
+    flex: 1; /* takes the remaining space so watch-auth can sit on the right */
     display: flex; /* Use flexbox for better alignment */
     justify-content: center; /* Center the items horizontally */
     align-items: center; /* Center the items vertically */
@@ -593,27 +597,37 @@ button:hover {
   color: #000;
 }
 
-/* ===== Watch-status login (who's marking movies seen) ===== */
+/* ===== Watch-status login, lives in the nav bar (who's marking movies seen) ===== */
 .watch-auth {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 16px;
-  padding: 10px 14px;
-  background-color: #f4effa;
-  border: 1px solid #e0d3f0;
+  gap: 8px;
+  margin: 6px 1.5em 6px 0;
+  padding: 4px 10px;
+  background-color: rgba(255,255,255,0.18);
   border-radius: 8px;
+  color: white;
+  font-size: 0.9em;
+}
+#watch-auth-login {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 .watch-auth select,
-.watch-auth input[type="password"],
-.watch-auth button {
-  padding: 0.5em;
-  font-size: 1em;
-  border: 1px solid #ddd;
+.watch-auth input[type="password"] {
+  padding: 0.4em 0.5em;
+  font-size: 0.95em;
+  border: 1px solid rgba(255,255,255,0.5);
   border-radius: 5px;
 }
 .watch-auth button {
+  padding: 0.4em 0.8em;
+  font-size: 0.95em;
+  border: none;
+  border-radius: 5px;
   background-color: #6f42c1;
   color: white;
   cursor: pointer;
@@ -622,14 +636,26 @@ button:hover {
   background-color: #59339c;
 }
 .watch-auth-error {
-  color: #c0392b;
-  font-size: 0.9em;
+  color: #ffe0e0;
+  font-size: 0.85em;
+}
+
+@media (max-width: 768px) {
+  nav {
+    justify-content: center;
+  }
+  .watch-auth {
+    margin: 6px 0;
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 /* ===== Per-card seen / want-to-watch / liked toggles ===== */
 .rating-controls {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 6px;
   margin-top: 10px;
 }
@@ -649,4 +675,23 @@ button:hover {
   background-color: #6f42c1;
   border-color: #6f42c1;
   color: white;
+}
+.rating-btn:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+.rating-status {
+  font-size: 0.78em;
+  min-width: 90px;
+}
+.rating-status.saving {
+  color: #888;
+}
+.rating-status.saved {
+  color: #27ae60;
+  font-weight: bold;
+}
+.rating-status.error {
+  color: #c0392b;
+  font-weight: bold;
 }

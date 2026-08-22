@@ -40,6 +40,19 @@
             <li><a href="#boardgames" onclick="toggleSection('boardgames')">Board Games</a></li>
             <li><a href="#randomizer" onclick="toggleSection('randomizer')">🎲 Pick For Me</a></li>
         </ul>
+
+        <!-- Who's browsing: log in to mark movies seen / want-to-watch / liked -->
+        <div class="watch-auth" id="watch-auth">
+          <div id="watch-auth-login">
+            <select id="watch-auth-username"></select>
+            <input type="password" id="watch-auth-password" placeholder="Password">
+            <button onclick="watchLogin()">Log In</button>
+            <span id="watch-auth-error" class="watch-auth-error"></span>
+          </div>
+          <div id="watch-auth-loggedin" style="display:none">
+            Signed in as <strong id="watch-auth-name"></strong> &middot; <button onclick="watchLogout()">Log Out</button>
+          </div>
+        </div>
     </nav>
     <script>
         function toggleSection(sectionId) {
@@ -66,19 +79,6 @@
     <!-- Movies Section -->
     <section id="movies" style="display:none">
         <h2>Movies</h2>
-
-        <!-- Who's browsing: log in to mark movies seen / want-to-watch / liked -->
-        <div class="watch-auth" id="watch-auth">
-          <div id="watch-auth-login">
-            <select id="watch-auth-username"></select>
-            <input type="password" id="watch-auth-password" placeholder="Password">
-            <button onclick="watchLogin()">Log In</button>
-            <span id="watch-auth-error" class="watch-auth-error"></span>
-          </div>
-          <div id="watch-auth-loggedin" style="display:none">
-            Signed in as <strong id="watch-auth-name"></strong> &middot; <button onclick="watchLogout()">Log Out</button>
-          </div>
-        </div>
 
         <div class="search">
             <!-- Text search for title -->
@@ -157,8 +157,16 @@ async function toggleRating(movieId, field, btnEl) {
   const updated = getMyRating(movieId);
   updated[field] = !updated[field];
 
+  const statusEl = btnEl.closest('.rating-controls').querySelector('.rating-status');
+  const setStatus = (text, cls) => {
+    if (!statusEl) return;
+    statusEl.textContent = text;
+    statusEl.className = `rating-status ${cls}`;
+  };
+
   btnEl.classList.toggle('active');
   btnEl.disabled = true;
+  setStatus('Saving…', 'saving');
   try {
     const res = await fetch(`${API_BASE}/ratings`, {
       method: 'POST',
@@ -168,10 +176,12 @@ async function toggleRating(movieId, field, btnEl) {
     if (!res.ok) throw new Error('save failed');
     if (!ratingsByMovie[movieId]) ratingsByMovie[movieId] = {};
     ratingsByMovie[movieId][currentUser.username] = updated;
+    setStatus('✓ Saved', 'saved');
+    setTimeout(() => setStatus('', ''), 1500);
   } catch (error) {
     console.error('Could not save rating:', error);
     btnEl.classList.toggle('active'); // revert the optimistic toggle
-    alert('Could not save that — check your connection and try again.');
+    setStatus('⚠ Not saved — try again', 'error');
   } finally {
     btnEl.disabled = false;
   }
@@ -236,6 +246,7 @@ function buildMovieCard(columns, movie) {
           <button type="button" class="rating-btn ${myRating.seen ? 'active' : ''}" data-field="seen">👁 Seen</button>
           <button type="button" class="rating-btn ${myRating.want_to_watch ? 'active' : ''}" data-field="want_to_watch">🔖 Want to Watch</button>
           <button type="button" class="rating-btn ${myRating.liked ? 'active' : ''}" data-field="liked">❤ Liked</button>
+          <span class="rating-status" aria-live="polite"></span>
         </div>` : '';
 
   listItem.innerHTML = `
