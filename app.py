@@ -37,6 +37,9 @@ def chat():
 
 @app.route("/users", methods=["GET"])
 def users():
+    # Requires login so an anonymous visitor can't enumerate who has an account.
+    if not _current_user():
+        return jsonify({"error": "Not logged in"}), 401
     return jsonify(ratings_db.list_users())
 
 
@@ -60,6 +63,12 @@ def logout():
     if auth_header.startswith("Bearer "):
         ratings_db.delete_session(auth_header[7:])
     return jsonify({"ok": True})
+
+
+@app.route("/ratings/liked-counts", methods=["GET"])
+def ratings_liked_counts():
+    # Public: just a count per movie (0/1/2), never who -- safe for anyone browsing the site.
+    return jsonify(ratings_db.get_liked_counts())
 
 
 @app.route("/ratings", methods=["GET"])

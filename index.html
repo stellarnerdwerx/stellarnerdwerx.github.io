@@ -44,8 +44,8 @@
         <!-- Who's browsing: log in to mark movies seen / want-to-watch / liked -->
         <div class="watch-auth" id="watch-auth">
           <div id="watch-auth-login">
-            <select id="watch-auth-username"></select>
-            <input type="password" id="watch-auth-password" placeholder="Password">
+            <input type="text" id="watch-auth-username" placeholder="Username" autocomplete="username">
+            <input type="password" id="watch-auth-password" placeholder="Password" autocomplete="current-password">
             <button onclick="watchLogin()">Log In</button>
             <span id="watch-auth-error" class="watch-auth-error"></span>
           </div>
@@ -137,8 +137,20 @@ let db;
 const API_BASE = 'https://sestock.pythonanywhere.com';
 
 let currentUser = null;       // {username, display_name, token} once logged in
-let allUsers = [];            // [{username, display_name}, ...] from GET /users
+let allUsers = [];            // [{username, display_name}, ...] from GET /users (login-only)
 let ratingsByMovie = {};      // movie_id -> { username: {seen, want_to_watch, liked} }
+let likedCounts = {};         // movie_id -> how many of us liked it (0-2), public, no names attached
+
+async function fetchLikedCounts() {
+  try {
+    const res = await fetch(`${API_BASE}/ratings/liked-counts`);
+    likedCounts = res.ok ? await res.json() : {};
+  } catch (error) {
+    console.error('Could not load liked counts:', error);
+    likedCounts = {};
+  }
+  if (db) searchMovies(); // re-render any already-visible cards once counts arrive
+}
 
 function escHtml(str) {
   return String(str ?? '').replace(/[&<>"']/g, c => ({
@@ -240,6 +252,12 @@ function buildMovieCard(columns, movie) {
     ? `<img src="${escHtml(movieData.poster_url)}" alt="${escHtml(title)} poster" class="card-poster" loading="lazy" onerror="this.outerHTML='&lt;div class=&quot;card-poster-placeholder&quot;&gt;🎬&lt;/div&gt;'">`
     : `<div class="card-poster-placeholder">🎬</div>`;
 
+  // Public consensus badge: 👍 if either of us liked it, 👍👍 if we both did. No names attached.
+  const likedCount = likedCounts[movieData.id] || 0;
+  const likedBadge = likedCount > 0
+    ? `<div class="liked-badge" title="${likedCount === 1 ? 'One of us liked this' : 'We both liked this'}">${'👍'.repeat(likedCount)}</div>`
+    : '';
+
   const myRating = getMyRating(movieData.id);
   const ratingControls = currentUser ? `
         <div class="rating-controls">
@@ -253,6 +271,7 @@ function buildMovieCard(columns, movie) {
     <div class="flip-card-inner">
       <div class="flip-card-front">
         ${posterFace}
+        ${likedBadge}
         <div class="card-caption">
           <div class="card-title">${escHtml(title)}</div>
           <div class="card-meta">${movieData.year || ''}${movieData.rating ? ' · ★ ' + movieData.rating : ''}</div>
@@ -372,19 +391,6 @@ function searchMovies() {
 // ---- Login / logout for the two-person "who's seen what" tracker ----
 
 async function initWatchAuth() {
-  try {
-    const res = await fetch(`${API_BASE}/users`);
-    allUsers = await res.json();
-  } catch (error) {
-    console.error('Could not load users:', error);
-    allUsers = [];
-  }
-
-  const usernameSelect = document.getElementById('watch-auth-username');
-  usernameSelect.innerHTML = allUsers
-    .map(u => `<option value="${escHtml(u.username)}">${escHtml(u.display_name)}</option>`)
-    .join('');
-
   const stored = localStorage.getItem('watchAuth');
   if (stored) {
     try {
@@ -392,7 +398,7 @@ async function initWatchAuth() {
     } catch (error) {
       currentUser = null;
     }
-    const ok = currentUser && await fetchRatings();
+    const ok = currentUser && await loadAuthedData();
     if (ok) {
       showLoggedIn();
     } else {
@@ -403,6 +409,15 @@ async function initWatchAuth() {
   } else {
     showLoggedOut();
   }
+}
+
+// Fetches ratings + the (login-only) user list. Only ever called once someone
+// is actually signed in, so an anonymous visitor can't see who has accounts.
+async function loadAuthedData() {
+  const ratingsOk = await fetchRatings();
+  if (!ratingsOk) return false;
+  await fetchUsers();
+  return true;
 }
 
 async function fetchRatings() {
@@ -427,14 +442,30 @@ async function fetchRatings() {
   }
 }
 
+async function fetchUsers() {
+  if (!currentUser) {
+    allUsers = [];
+    return;
+  }
+  try {
+    const res = await fetch(`${API_BASE}/users`, {
+      headers: { 'Authorization': `Bearer ${currentUser.token}` }
+    });
+    allUsers = res.ok ? await res.json() : [];
+  } catch (error) {
+    console.error('Could not load users:', error);
+    allUsers = [];
+  }
+}
+
 async function watchLogin() {
-  const username = document.getElementById('watch-auth-username').value;
+  const username = document.getElementById('watch-auth-username').value.trim();
   const password = document.getElementById('watch-auth-password').value;
   const errorEl = document.getElementById('watch-auth-error');
   errorEl.textContent = '';
 
   if (!username || !password) {
-    errorEl.textContent = 'Pick a name and enter a password.';
+    errorEl.textContent = 'Enter your username and password.';
     return;
   }
 
@@ -452,7 +483,7 @@ async function watchLogin() {
     currentUser = { username: data.username, display_name: data.display_name, token: data.token };
     localStorage.setItem('watchAuth', JSON.stringify(currentUser));
     document.getElementById('watch-auth-password').value = '';
-    await fetchRatings();
+    await loadAuthedData();
     showLoggedIn();
   } catch (error) {
     console.error('Login error:', error);
@@ -468,6 +499,7 @@ function watchLogout() {
     }).catch(() => {});
   }
   currentUser = null;
+  allUsers = [];
   ratingsByMovie = {};
   localStorage.removeItem('watchAuth');
   showLoggedOut();
@@ -519,6 +551,7 @@ function showLoggedOut() {
 document.addEventListener('DOMContentLoaded', () => {
   loadDatabase();
   initWatchAuth();
+  fetchLikedCounts();
 
   document.getElementById('movie-search').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {

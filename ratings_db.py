@@ -149,3 +149,13 @@ def get_all_ratings():
     ).fetchall()
     conn.close()
     return [dict(r) for r in rows]
+
+
+def get_liked_counts():
+    """Public-safe aggregate: how many people liked each movie, no usernames attached."""
+    conn = get_conn()
+    rows = conn.execute(
+        "SELECT movie_id, COUNT(*) AS liked_count FROM movie_ratings WHERE liked = 1 GROUP BY movie_id"
+    ).fetchall()
+    conn.close()
+    return {str(r["movie_id"]): r["liked_count"] for r in rows}
