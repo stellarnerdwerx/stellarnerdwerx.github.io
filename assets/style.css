@@ -592,3 +592,61 @@ button:hover {
   align-self: flex-end;
   color: #000;
 }
+
+/* ===== Watch-status login (who's marking movies seen) ===== */
+.watch-auth {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background-color: #f4effa;
+  border: 1px solid #e0d3f0;
+  border-radius: 8px;
+}
+.watch-auth select,
+.watch-auth input[type="password"],
+.watch-auth button {
+  padding: 0.5em;
+  font-size: 1em;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+}
+.watch-auth button {
+  background-color: #6f42c1;
+  color: white;
+  cursor: pointer;
+}
+.watch-auth button:hover {
+  background-color: #59339c;
+}
+.watch-auth-error {
+  color: #c0392b;
+  font-size: 0.9em;
+}
+
+/* ===== Per-card seen / want-to-watch / liked toggles ===== */
+.rating-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.rating-btn {
+  padding: 4px 10px;
+  font-size: 0.8em;
+  border: 1px solid #ccc;
+  border-radius: 999px;
+  background: #f2f2f2;
+  color: #34495e;
+  cursor: pointer;
+}
+.rating-btn:hover {
+  background: #e6e6e6;
+}
+.rating-btn.active {
+  background-color: #6f42c1;
+  border-color: #6f42c1;
+  color: white;
+}

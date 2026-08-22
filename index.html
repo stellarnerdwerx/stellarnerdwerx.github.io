@@ -66,6 +66,20 @@
     <!-- Movies Section -->
     <section id="movies" style="display:none">
         <h2>Movies</h2>
+
+        <!-- Who's browsing: log in to mark movies seen / want-to-watch / liked -->
+        <div class="watch-auth" id="watch-auth">
+          <div id="watch-auth-login">
+            <select id="watch-auth-username"></select>
+            <input type="password" id="watch-auth-password" placeholder="Password">
+            <button onclick="watchLogin()">Log In</button>
+            <span id="watch-auth-error" class="watch-auth-error"></span>
+          </div>
+          <div id="watch-auth-loggedin" style="display:none">
+            Signed in as <strong id="watch-auth-name"></strong> &middot; <button onclick="watchLogout()">Log Out</button>
+          </div>
+        </div>
+
         <div class="search">
             <!-- Text search for title -->
             <input type="text" id="movie-search" placeholder="Search movies...">
@@ -95,6 +109,11 @@
                 <option value="thriller">Thriller</option>
             </select>
 
+            <!-- Dropdown for watch status, populated once someone logs in -->
+            <select id="movie-watch-status" disabled>
+                <option value="">Log in above to filter by who has seen it</option>
+            </select>
+
             <!-- Search button -->
             <button onclick="searchMovies()">Search</button>
         </div>
@@ -113,10 +132,75 @@ const sqlConfig = {
 
 let db;
 
+// Backend that owns logins + who's-seen-what (separate from the static, read-only
+// movie catalog db above, since that one only changes when the site is redeployed).
+const API_BASE = 'https://sestock.pythonanywhere.com';
+
+let currentUser = null;       // {username, display_name, token} once logged in
+let allUsers = [];            // [{username, display_name}, ...] from GET /users
+let ratingsByMovie = {};      // movie_id -> { username: {seen, want_to_watch, liked} }
+
 function escHtml(str) {
   return String(str ?? '').replace(/[&<>"']/g, c => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
   }[c]));
+}
+
+function getMyRating(movieId) {
+  const empty = { seen: false, want_to_watch: false, liked: false };
+  if (!currentUser) return empty;
+  const r = ratingsByMovie[movieId] && ratingsByMovie[movieId][currentUser.username];
+  return r ? { seen: !!r.seen, want_to_watch: !!r.want_to_watch, liked: !!r.liked } : empty;
+}
+
+async function toggleRating(movieId, field, btnEl) {
+  const updated = getMyRating(movieId);
+  updated[field] = !updated[field];
+
+  btnEl.classList.toggle('active');
+  btnEl.disabled = true;
+  try {
+    const res = await fetch(`${API_BASE}/ratings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${currentUser.token}` },
+      body: JSON.stringify({ movie_id: movieId, ...updated })
+    });
+    if (!res.ok) throw new Error('save failed');
+    if (!ratingsByMovie[movieId]) ratingsByMovie[movieId] = {};
+    ratingsByMovie[movieId][currentUser.username] = updated;
+  } catch (error) {
+    console.error('Could not save rating:', error);
+    btnEl.classList.toggle('active'); // revert the optimistic toggle
+    alert('Could not save that — check your connection and try again.');
+  } finally {
+    btnEl.disabled = false;
+  }
+}
+
+// Turns the id column of a result row into who-has/hasn't-seen filtering,
+// done in JS (not SQL) since ratings live on the live backend, not the static db.
+function filterByWatchStatus(columns, rows, value) {
+  if (!value) return rows;
+  const idIdx = columns.indexOf('id');
+  const sepIndex = value.indexOf(':');
+  const mode = value.slice(0, sepIndex);
+  const who = value.slice(sepIndex + 1);
+
+  return rows.filter(row => {
+    const ratings = ratingsByMovie[row[idIdx]] || {};
+    if (mode === 'unseen') {
+      if (who === 'ALL') return !Object.values(ratings).some(r => r.seen);
+      return !(ratings[who] && ratings[who].seen);
+    }
+    if (mode === 'seen') {
+      if (who === 'ALL') {
+        const seenCount = Object.values(ratings).filter(r => r.seen).length;
+        return allUsers.length > 0 && seenCount >= allUsers.length;
+      }
+      return !!(ratings[who] && ratings[who].seen);
+    }
+    return true;
+  });
 }
 
 // Builds a flip-card <li> for a single movie row. Shared by search results and the randomizer.
@@ -146,6 +230,14 @@ function buildMovieCard(columns, movie) {
     ? `<img src="${escHtml(movieData.poster_url)}" alt="${escHtml(title)} poster" class="card-poster" loading="lazy" onerror="this.outerHTML='&lt;div class=&quot;card-poster-placeholder&quot;&gt;🎬&lt;/div&gt;'">`
     : `<div class="card-poster-placeholder">🎬</div>`;
 
+  const myRating = getMyRating(movieData.id);
+  const ratingControls = currentUser ? `
+        <div class="rating-controls">
+          <button type="button" class="rating-btn ${myRating.seen ? 'active' : ''}" data-field="seen">👁 Seen</button>
+          <button type="button" class="rating-btn ${myRating.want_to_watch ? 'active' : ''}" data-field="want_to_watch">🔖 Want to Watch</button>
+          <button type="button" class="rating-btn ${myRating.liked ? 'active' : ''}" data-field="liked">❤ Liked</button>
+        </div>` : '';
+
   listItem.innerHTML = `
     <div class="flip-card-inner">
       <div class="flip-card-front">
@@ -163,13 +255,20 @@ function buildMovieCard(columns, movie) {
         <div class="card-genres">${escHtml(movieData.genres || '')}</div>
         <div class="card-plot">${escHtml(movieData.plot || 'No synopsis available.')}</div>
         ${movieData.director ? `<div class="card-detail-line"><strong>Director:</strong> ${escHtml(movieData.director.replace(/\|/g, ', '))}</div>` : ''}
-        ${movieData.cast ? `<div class="card-detail-line"><strong>Cast:</strong> ${escHtml(movieData.cast.replace(/\|/g, ', '))}</div>` : ''}
+        ${movieData.cast ? `<div class="card-detail-line"><strong>Cast:</strong> ${escHtml(movieData.cast.replace(/\|/g, ', '))}</div>` : ''}${ratingControls}
       </div>
     </div>
   `;
 
   listItem.querySelector('.flip-card-inner').addEventListener('click', () => {
     listItem.classList.toggle('flipped');
+  });
+
+  listItem.querySelectorAll('.rating-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleRating(movieData.id, btn.dataset.field, btn);
+    });
   });
 
   return listItem;
@@ -207,6 +306,7 @@ function searchMovies() {
     const title = document.getElementById('movie-search').value.toLowerCase();
     const genre = document.getElementById('movie-genre').value;
     const format = document.getElementById('movie-format').value;
+    const watchStatus = document.getElementById('movie-watch-status').value;
 
     let query = "SELECT * FROM movies WHERE 1=1";
     let conditions = [];
@@ -228,37 +328,186 @@ function searchMovies() {
     }
 
     query += " ORDER BY title";
-    
+
     console.log('Executing query:', query);
     const results = db.exec(query);
 
+    const columns = results.length ? results[0].columns : [];
+    let rows = results.length ? results[0].values : [];
+    rows = filterByWatchStatus(columns, rows, watchStatus);
+
     // Update the result count display
     const resultCountElementMovie = document.getElementById('movie-result-count');
-    resultCountElementMovie.innerHTML = `Collection contains ${results[0].values.length} movie${results[0].values.length !== 1 ? 's' : ''}`;
+    resultCountElementMovie.innerHTML = `Collection contains ${rows.length} movie${rows.length !== 1 ? 's' : ''}`;
 
     const movieList = document.getElementById('movie-list');
     movieList.innerHTML = '';
 
-    if (results && results.length > 0 && results[0].values.length > 0) {
-      const columns = results[0].columns;
-
-      results[0].values.forEach(movie => {
+    if (rows.length > 0) {
+      rows.forEach(movie => {
         movieList.appendChild(buildMovieCard(columns, movie));
       });
-    } else if (results[0].values.length === 0) {
+    } else {
       movieList.innerHTML = '<li class="no-results">No movies found.</li>';
     }
   } catch (error) {
     console.error('Search error:', error);
-    document.getElementById('movie-list').innerHTML = 
+    document.getElementById('movie-list').innerHTML =
     '<li class="no-results">No movies found.</li>';
     //   `<li class="error">Error: ${error.message}</li>`;
   }
 }
 
+// ---- Login / logout for the two-person "who's seen what" tracker ----
+
+async function initWatchAuth() {
+  try {
+    const res = await fetch(`${API_BASE}/users`);
+    allUsers = await res.json();
+  } catch (error) {
+    console.error('Could not load users:', error);
+    allUsers = [];
+  }
+
+  const usernameSelect = document.getElementById('watch-auth-username');
+  usernameSelect.innerHTML = allUsers
+    .map(u => `<option value="${escHtml(u.username)}">${escHtml(u.display_name)}</option>`)
+    .join('');
+
+  const stored = localStorage.getItem('watchAuth');
+  if (stored) {
+    try {
+      currentUser = JSON.parse(stored);
+    } catch (error) {
+      currentUser = null;
+    }
+    const ok = currentUser && await fetchRatings();
+    if (ok) {
+      showLoggedIn();
+    } else {
+      currentUser = null;
+      localStorage.removeItem('watchAuth');
+      showLoggedOut();
+    }
+  } else {
+    showLoggedOut();
+  }
+}
+
+async function fetchRatings() {
+  if (!currentUser) return false;
+  try {
+    const res = await fetch(`${API_BASE}/ratings`, {
+      headers: { 'Authorization': `Bearer ${currentUser.token}` }
+    });
+    if (!res.ok) return false;
+    const rows = await res.json();
+    ratingsByMovie = {};
+    rows.forEach(r => {
+      if (!ratingsByMovie[r.movie_id]) ratingsByMovie[r.movie_id] = {};
+      ratingsByMovie[r.movie_id][r.username] = {
+        seen: !!r.seen, want_to_watch: !!r.want_to_watch, liked: !!r.liked
+      };
+    });
+    return true;
+  } catch (error) {
+    console.error('Could not load ratings:', error);
+    return false;
+  }
+}
+
+async function watchLogin() {
+  const username = document.getElementById('watch-auth-username').value;
+  const password = document.getElementById('watch-auth-password').value;
+  const errorEl = document.getElementById('watch-auth-error');
+  errorEl.textContent = '';
+
+  if (!username || !password) {
+    errorEl.textContent = 'Pick a name and enter a password.';
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      errorEl.textContent = data.error || 'Login failed.';
+      return;
+    }
+    currentUser = { username: data.username, display_name: data.display_name, token: data.token };
+    localStorage.setItem('watchAuth', JSON.stringify(currentUser));
+    document.getElementById('watch-auth-password').value = '';
+    await fetchRatings();
+    showLoggedIn();
+  } catch (error) {
+    console.error('Login error:', error);
+    errorEl.textContent = 'Could not reach the server.';
+  }
+}
+
+function watchLogout() {
+  if (currentUser) {
+    fetch(`${API_BASE}/logout`, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${currentUser.token}` }
+    }).catch(() => {});
+  }
+  currentUser = null;
+  ratingsByMovie = {};
+  localStorage.removeItem('watchAuth');
+  showLoggedOut();
+}
+
+function populateWatchStatusSelects() {
+  ['movie-watch-status', 'rand-watch-status'].forEach(id => {
+    const select = document.getElementById(id);
+    if (!select) return;
+
+    if (!currentUser || allUsers.length === 0) {
+      select.innerHTML = '<option value="">Log in above to filter by who has seen it</option>';
+      select.disabled = true;
+      return;
+    }
+
+    select.disabled = false;
+    let html = '<option value="">Any Watch Status</option>';
+    allUsers.forEach(u => {
+      html += `<option value="unseen:${escHtml(u.username)}">Not seen by ${escHtml(u.display_name)}</option>`;
+    });
+    if (allUsers.length > 1) {
+      html += `<option value="unseen:ALL">Not seen by anyone</option>`;
+      html += `<option value="seen:ALL">Seen by everyone</option>`;
+    }
+    allUsers.forEach(u => {
+      html += `<option value="seen:${escHtml(u.username)}">Seen by ${escHtml(u.display_name)}</option>`;
+    });
+    select.innerHTML = html;
+  });
+}
+
+function showLoggedIn() {
+  document.getElementById('watch-auth-login').style.display = 'none';
+  document.getElementById('watch-auth-loggedin').style.display = 'block';
+  document.getElementById('watch-auth-name').textContent = currentUser.display_name;
+  populateWatchStatusSelects();
+  if (db) searchMovies();
+}
+
+function showLoggedOut() {
+  document.getElementById('watch-auth-login').style.display = 'block';
+  document.getElementById('watch-auth-loggedin').style.display = 'none';
+  populateWatchStatusSelects();
+  if (db) searchMovies();
+}
+
 // Add event listeners
 document.addEventListener('DOMContentLoaded', () => {
   loadDatabase();
+  initWatchAuth();
 
   document.getElementById('movie-search').addEventListener('keypress', (e) => {
     if (e.key === 'Enter') {
@@ -266,9 +515,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  document.getElementById('watch-auth-password').addEventListener('keypress', (e) => {
+    if (e.key === 'Enter') {
+      watchLogin();
+    }
+  });
+
   // Add change event listeners for dropdowns
   document.getElementById('movie-format').addEventListener('change', searchMovies);
   document.getElementById('movie-genre').addEventListener('change', searchMovies);
+  document.getElementById('movie-watch-status').addEventListener('change', searchMovies);
 });
 </script>
     </section>
@@ -676,6 +932,10 @@ document.addEventListener('DOMContentLoaded', () => {
             <input type="text" id="rand-director" placeholder="Director (optional)">
             <input type="text" id="rand-actor" placeholder="Actor (optional)">
 
+            <select id="rand-watch-status" disabled>
+                <option value="">Log in above to filter by who has seen it</option>
+            </select>
+
             <button onclick="pickRandomMovie()">🎲 Pick For Me!</button>
         </div>
 
@@ -827,28 +1087,29 @@ document.addEventListener('DOMContentLoaded', () => {
             conditions.push(`LOWER("cast") LIKE '%${actor.replace(/'/g, "''")}%'`);
           }
 
+          const watchStatus = document.getElementById('rand-watch-status').value;
+
           let query = "SELECT * FROM movies WHERE 1=1";
           if (conditions.length > 0) {
             query += ` AND ${conditions.join(' AND ')}`;
           }
 
-          const countResult = db.exec(`SELECT COUNT(*) FROM (${query})`);
-          const matchCount = countResult[0].values[0][0];
+          const queryResult = db.exec(query);
+          const columns = queryResult.length ? queryResult[0].columns : [];
+          const rows = filterByWatchStatus(columns, queryResult.length ? queryResult[0].values : [], watchStatus);
 
           const resultCountEl = document.getElementById('rand-result-count');
           const resultList = document.getElementById('rand-result');
           resultList.innerHTML = '';
 
-          if (matchCount === 0) {
+          if (rows.length === 0) {
             resultCountEl.innerHTML = `No movies match those filters — try loosening them up.`;
             return;
           }
 
-          resultCountEl.innerHTML = `Picked from ${matchCount} matching movie${matchCount !== 1 ? 's' : ''}:`;
+          resultCountEl.innerHTML = `Picked from ${rows.length} matching movie${rows.length !== 1 ? 's' : ''}:`;
 
-          const pickResult = db.exec(`${query} ORDER BY RANDOM() LIMIT 1`);
-          const columns = pickResult[0].columns;
-          const movie = pickResult[0].values[0];
+          const movie = rows[Math.floor(Math.random() * rows.length)];
 
           const card = buildMovieCard(columns, movie);
           card.classList.add('rand-card');
