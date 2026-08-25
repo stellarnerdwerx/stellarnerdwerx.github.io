@@ -121,6 +121,7 @@
         <!-- Movie results will appear here -->
         <div id="movie-result-count"></div>
         <ul id="movie-list"></ul>
+        <div id="movie-pagination" class="pagination"></div>
     </section>
         <!-- SQLite.js Library -->
 <script>
@@ -131,6 +132,56 @@ const sqlConfig = {
 };
 
 let db;
+
+// ---- Shared pagination for the movie/vgame/bgame result lists ----
+// Mobile browsers run out of memory (and reload the tab) if we dump the
+// entire catalog into the DOM as flip-cards at once, so every list renders
+// one page at a time instead.
+const PAGE_SIZE = 60;
+const paginationState = {}; // key -> {listElId, controlsElId, columns, rows, buildCard, noResultsHtml, page}
+
+function setPaginatedResults(key, { listElId, controlsElId, columns, rows, buildCard, noResultsHtml }) {
+  paginationState[key] = { listElId, controlsElId, columns, rows, buildCard, noResultsHtml, page: 1 };
+  renderPaginatedPage(key);
+}
+
+function renderPaginatedPage(key) {
+  const state = paginationState[key];
+  if (!state) return;
+  const listEl = document.getElementById(state.listElId);
+  const controlsEl = document.getElementById(state.controlsElId);
+  const totalPages = Math.max(1, Math.ceil(state.rows.length / PAGE_SIZE));
+  state.page = Math.min(Math.max(1, state.page), totalPages);
+
+  listEl.innerHTML = '';
+  if (state.rows.length === 0) {
+    listEl.innerHTML = state.noResultsHtml;
+  } else {
+    const start = (state.page - 1) * PAGE_SIZE;
+    state.rows.slice(start, start + PAGE_SIZE).forEach(row => {
+      listEl.appendChild(state.buildCard(state.columns, row));
+    });
+  }
+
+  if (!controlsEl) return;
+  if (state.rows.length <= PAGE_SIZE) {
+    controlsEl.innerHTML = '';
+    return;
+  }
+  controlsEl.innerHTML = `
+    <button type="button" ${state.page <= 1 ? 'disabled' : ''} onclick="goToPaginatedPage('${key}', ${state.page - 1})">&lsaquo; Prev</button>
+    <span class="pagination-status">Page ${state.page} of ${totalPages}</span>
+    <button type="button" ${state.page >= totalPages ? 'disabled' : ''} onclick="goToPaginatedPage('${key}', ${state.page + 1})">Next &rsaquo;</button>
+  `;
+}
+
+function goToPaginatedPage(key, page) {
+  const state = paginationState[key];
+  if (!state) return;
+  state.page = page;
+  renderPaginatedPage(key);
+  document.getElementById(state.listElId).scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 // Backend that owns logins + who's-seen-what (separate from the static, read-only
 // movie catalog db above, since that one only changes when the site is redeployed).
@@ -369,16 +420,14 @@ function searchMovies() {
     const resultCountElementMovie = document.getElementById('movie-result-count');
     resultCountElementMovie.innerHTML = `Collection contains ${rows.length} movie${rows.length !== 1 ? 's' : ''}`;
 
-    const movieList = document.getElementById('movie-list');
-    movieList.innerHTML = '';
-
-    if (rows.length > 0) {
-      rows.forEach(movie => {
-        movieList.appendChild(buildMovieCard(columns, movie));
-      });
-    } else {
-      movieList.innerHTML = '<li class="no-results">No movies found.</li>';
-    }
+    setPaginatedResults('movie', {
+      listElId: 'movie-list',
+      controlsElId: 'movie-pagination',
+      columns,
+      rows,
+      buildCard: buildMovieCard,
+      noResultsHtml: '<li class="no-results">No movies found.</li>'
+    });
   } catch (error) {
     console.error('Search error:', error);
     document.getElementById('movie-list').innerHTML =
@@ -631,6 +680,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <ul id="vgame-list">
             <!-- Game results will appear here -->
         </ul>
+        <div id="vgame-pagination" class="pagination"></div>
     </section>
     <script>
         // Function to search for video games
@@ -721,18 +771,17 @@ function searchvgames() {
     const resultCountElementVgame = document.getElementById('vgame-result-count');
     resultCountElementVgame.innerHTML = `Collection contains ${results[0].values.length} video game${results[0].values.length !== 1 ? 's' : ''}`;
 
-    const vgameList = document.getElementById('vgame-list');
-    vgameList.innerHTML = '';
+    const columns = results.length ? results[0].columns : [];
+    const rows = results.length ? results[0].values : [];
 
-    if (results && results.length > 0 && results[0].values.length > 0) {
-      const columns = results[0].columns;
-
-      results[0].values.forEach(vgame => {
-        vgameList.appendChild(buildVgameCard(columns, vgame));
-      });
-    } else if (results[0].values.length === 0) {
-      vgameList.innerHTML = '<li class="no-results">No video games found.</li>';
-    }
+    setPaginatedResults('vgame', {
+      listElId: 'vgame-list',
+      controlsElId: 'vgame-pagination',
+      columns,
+      rows,
+      buildCard: buildVgameCard,
+      noResultsHtml: '<li class="no-results">No video games found.</li>'
+    });
   } catch (error) {
     console.error('Search error:', error);
     document.getElementById('vgame-list').innerHTML = 
@@ -799,6 +848,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       <div id="bgame-result-count"></div>
       <ul id="bgame-list"></ul>
+      <div id="bgame-pagination" class="pagination"></div>
     </section>
 
     <script>
@@ -897,21 +947,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const results = db.exec(query);
 
     const resultCountElementBgame = document.getElementById('bgame-result-count');
-    const bgameList = document.getElementById('bgame-list');
-    bgameList.innerHTML = '';
+    const count = results.length ? results[0].values.length : 0;
+    resultCountElementBgame.innerHTML = `Collection contains ${count} board game${count !== 1 ? 's' : ''}`;
 
-    if (results && results.length > 0 && results[0].values.length > 0) {
-      const count = results[0].values.length;
-      resultCountElementBgame.innerHTML = `Collection contains ${count} board game${count !== 1 ? 's' : ''}`;
+    const columns = results.length ? results[0].columns : [];
+    const rows = results.length ? results[0].values : [];
 
-      const columns = results[0].columns;
-
-      results[0].values.forEach(bgame => {
-        bgameList.appendChild(buildBgameCard(columns, bgame));
-      });
-    } else if (results[0].values.length === 0) {
-      bgameList.innerHTML = '<li class="no-results">No board games found.</li>';
-    }
+    setPaginatedResults('bgame', {
+      listElId: 'bgame-list',
+      controlsElId: 'bgame-pagination',
+      columns,
+      rows,
+      buildCard: buildBgameCard,
+      noResultsHtml: '<li class="no-results">No board games found.</li>'
+    });
     } catch (error) {
     console.error('Search error:', error);
     document.getElementById('bgame-list').innerHTML = 

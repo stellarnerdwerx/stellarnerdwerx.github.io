@@ -197,6 +197,31 @@ button:hover {
     background-color: #0052a3;
 }
 
+button:disabled {
+    background-color: #99b3cc;
+    cursor: default;
+}
+
+/* ===== Pagination controls for the movie/vgame/bgame result lists ===== */
+
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1em;
+    margin: 1.5em 0;
+}
+
+.pagination button {
+    width: auto;
+}
+
+.pagination-status {
+    font-size: 0.95em;
+    opacity: 0.8;
+    white-space: nowrap;
+}
+
 /* ===== Card grid + flip-card results ===== */
 
 #result-count {
