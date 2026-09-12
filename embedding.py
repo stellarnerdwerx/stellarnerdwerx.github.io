@@ -29,6 +29,7 @@ GAME_PLATFORM_COLUMNS = {
     "SNES": "SNES",
     "GAMECUBE": "GameCube",
     "SWITCH": "Switch",
+    "SWITCH_2": "Switch 2",
     "WII": "Wii",
     "WII_U": "Wii U",
     "GAMEBOY": "Game Boy",
